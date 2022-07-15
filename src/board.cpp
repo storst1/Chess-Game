@@ -5,6 +5,7 @@ Board::Board() noexcept : possible_moves(*this)
     possible_moves.reserve(50);
     moves_played.reserve(150);
     allowed_moves.resize(8, std::vector<std::vector<DIR>> (8, std::vector<DIR>(0)));
+    Move m(6, 4, 7, 2, 7, 0, 8, 8, true);
 }
 
 Board::Board(const Board &parent) noexcept
@@ -23,6 +24,12 @@ Board::Board(const Board &parent) noexcept
 void Board::DrawBoard(QPainter *painter, int cx, int cy) const noexcept
 {
     bool painted[8][8]{};
+
+    if(IsCheck()){
+        Coords king_pos = FindKing(turn);
+        painter->fillRect(king_pos.x * sp + 1, king_pos.y * sp + 1, sp - 1, sp - 1, check_on_king_square);
+        painted[king_pos.x][king_pos.y] = true;
+    }
 
     if(cx != -1){
         for(const auto& move : possible_moves){
@@ -84,9 +91,22 @@ Move &Board::LastMove()
     return moves_played[moves_played.size() - 1];
 }
 
+Coords Board::FindKing(bool color) const noexcept
+{
+    for(int i = 0; i < 8; ++i){
+        for(int j =  0; j < 8; ++j){
+            if(abs(board[i][j]) == 6 && Same(color, board[i][j])){
+                return Coords{(uint_fast8_t)i, (uint_fast8_t)j};
+            }
+        }
+    }
+    return Coords{(uint_fast8_t)255, (uint_fast8_t)255};
+}
+
 //Calculates all the possible moves on the board for the color that ows the current turn
 void Board::CalculatePossibleMoves() noexcept
 {
+    checks.clear();
     possible_moves.clear();
     ClearAllowedMoves();
     ClearDefendedSquares();
@@ -139,10 +159,10 @@ void Board::CalculateMoves(uint_fast8_t x, uint_fast8_t y) noexcept
 void Board::CalculatePawnMoves(uint_fast8_t x, uint_fast8_t y) noexcept
 {
     //Check if pawn can move 2 squares forward
-    if(!turn && y == 1 && !board[x][y + 2]){
+    if(!turn && y == 1 && !board[x][y + 2] && !board[x][y + 1]){
         possible_moves.push_back(Move(board[x][y], x, y, x, y + 2, board[x][y + 2]));
     }
-    else if(turn && y == 6 && !board[x][y - 2]){
+    else if(turn && y == 6 && !board[x][y - 2] && !board[x][y - 1]){
         possible_moves.push_back(Move(board[x][y], x, y, x, y - 2, board[x][y - 2]));
     }
 
@@ -156,18 +176,18 @@ void Board::CalculatePawnMoves(uint_fast8_t x, uint_fast8_t y) noexcept
 
     //Check if capture possible
     if(!turn){
-        if(OnBoard(x + 1, y + 1) && (board[x + 1][y + 1] < 0)){
+        if(OnBoard(x + 1, y + 1) && (board[x + 1][y + 1] > 0)){
             possible_moves.push_back(Move(board[x][y], x, y, x + 1, y + 1, board[x + 1][y + 1]));
         }
-        if(OnBoard(x - 1, y + 1) && (board[x + 1][y + 1] < 0)){
+        if(OnBoard(x - 1, y + 1) && (board[x - 1][y + 1] > 0)){
             possible_moves.push_back(Move(board[x][y], x, y, x - 1, y + 1, board[x - 1][y + 1]));
         }
     }
     else{
-        if(OnBoard(x + 1, y - 1) && (board[x + 1][y - 1] > 0)){
+        if(OnBoard(x + 1, y - 1) && (board[x + 1][y - 1] < 0)){
             possible_moves.push_back(Move(board[x][y], x, y, x + 1, y - 1, board[x + 1][y - 1]));
         }
-        if(OnBoard(x - 1, y - 1) && (board[x + 1][y - 1] > 0)){
+        if(OnBoard(x - 1, y - 1) && (board[x - 1][y - 1] < 0)){
             possible_moves.push_back(Move(board[x][y], x, y, x - 1, y - 1, board[x - 1][y - 1]));
         }
     }
@@ -240,7 +260,7 @@ void Board::CalculateBishopMoves(uint_fast8_t x, uint_fast8_t y) noexcept
             possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
             break;
         }
-        nx--; ny--;
+        --nx; --ny;
     }
 
     nx = x + 1, ny = y - 1;
@@ -255,7 +275,7 @@ void Board::CalculateBishopMoves(uint_fast8_t x, uint_fast8_t y) noexcept
             possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
             break;
         }
-        nx++; ny--;
+        ++nx; --ny;
     }
 
     nx = x + 1, ny = y + 1;
@@ -270,7 +290,7 @@ void Board::CalculateBishopMoves(uint_fast8_t x, uint_fast8_t y) noexcept
             possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
             break;
         }
-        nx++; ny++;
+        ++nx; ++ny;
     }
 
     nx = x - 1, ny = y + 1;
@@ -285,13 +305,13 @@ void Board::CalculateBishopMoves(uint_fast8_t x, uint_fast8_t y) noexcept
             possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
             break;
         }
-        nx--; ny++;
+        --nx; ++ny;
     }
 }
 
 void Board::CalculateRookMoves(uint_fast8_t x, uint_fast8_t y) noexcept
 {
-    uint_fast8_t nx = x - 1, ny = y - 1;
+    uint_fast8_t nx = x - 1, ny = y;
     while(OnBoard(nx, ny)){
         if(board[nx][ny] == 0){
             possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
@@ -303,7 +323,7 @@ void Board::CalculateRookMoves(uint_fast8_t x, uint_fast8_t y) noexcept
             possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
             break;
         }
-        nx--;
+        --nx;
     }
 
     nx = x + 1;
@@ -318,10 +338,10 @@ void Board::CalculateRookMoves(uint_fast8_t x, uint_fast8_t y) noexcept
             possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
             break;
         }
-        nx++;
+        ++nx;
     }
 
-    nx = x;
+    nx = x; ny = y - 1;
     while(OnBoard(nx, ny)){
         if(board[nx][ny] == 0){
             possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
@@ -333,7 +353,7 @@ void Board::CalculateRookMoves(uint_fast8_t x, uint_fast8_t y) noexcept
             possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
             break;
         }
-        ny--;
+        --ny;
     }
 
     ny = y + 1;
@@ -348,7 +368,7 @@ void Board::CalculateRookMoves(uint_fast8_t x, uint_fast8_t y) noexcept
             possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
             break;
         }
-        ny++;
+        ++ny;
     }
 }
 
@@ -360,29 +380,89 @@ void Board::CalculateQueenMoves(uint_fast8_t x, uint_fast8_t y) noexcept
 
 void Board::CalculateKingMoves(uint_fast8_t x, uint_fast8_t y) noexcept
 {
-    if(OnBoard(x - 1, y - 1) && !board[x - 1][y - 1]){
+    if(OnBoard(x - 1, y - 1) && (!board[x - 1][y - 1] || (Opposite(turn, board[x - 1][y - 1]) && !defended_squares[x - 1][y - 1]))){
         possible_moves.push_back(Move(board[x][y], x, y, x - 1, y - 1, board[x - 1][y - 1]));
     }
-    else if(OnBoard(x - 1, y + 1) && !board[x - 1][y + 1]){
+    if(OnBoard(x - 1, y + 1) && (!board[x - 1][y + 1] || (Opposite(turn, board[x - 1][y + 1]) && !defended_squares[x - 1][y + 1]))){
         possible_moves.push_back(Move(board[x][y], x, y, x - 1, y + 1, board[x - 1][y + 1]));
     }
-    else if(OnBoard(x + 1, y + 1) && !board[x + 1][y + 1]){
+    if(OnBoard(x + 1, y + 1) && (!board[x + 1][y + 1] || (Opposite(turn, board[x + 1][y + 1]) && !defended_squares[x + 1][y + 1]))){
         possible_moves.push_back(Move(board[x][y], x, y, x + 1, y + 1, board[x + 1][y + 1]));
     }
-    else if(OnBoard(x + 1, y - 1) && !board[x + 1][y - 1]){
+    if(OnBoard(x + 1, y - 1) && (!board[x + 1][y - 1] || (Opposite(turn, board[x + 1][y - 1]) && !defended_squares[x + 1][y - 1]))){
         possible_moves.push_back(Move(board[x][y], x, y, x + 1, y - 1, board[x + 1][y - 1]));
     }
-    else if(OnBoard(x, y + 1) && !board[x][y + 1]){
+    if(OnBoard(x, y + 1) && (!board[x][y + 1] || (Opposite(turn, board[x][y + 1]) && !defended_squares[x][y + 1]))){
         possible_moves.push_back(Move(board[x][y], x, y, x, y + 1, board[x][y + 1]));
     }
-    else if(OnBoard(x, y - 1) && !board[x][y - 1]){
+    if(OnBoard(x, y - 1) && (!board[x][y - 1] || (Opposite(turn, board[x][y - 1]) && !defended_squares[x][y - 1]))){
         possible_moves.push_back(Move(board[x][y], x, y, x, y - 1, board[x][y - 1]));
     }
-    else if(OnBoard(x + 1, y) && !board[x + 1][y]){
+    if(OnBoard(x + 1, y) && (!board[x + 1][y] || (Opposite(turn, board[x + 1][y]) && !defended_squares[x + 1][y]))){
         possible_moves.push_back(Move(board[x][y], x, y, x + 1, y, board[x + 1][y]));
     }
-    else if(OnBoard(x - 1, y) && !board[x - 1][y]){
+    if(OnBoard(x - 1, y) && (!board[x - 1][y] || (Opposite(turn, board[x - 1][y]) && !defended_squares[x - 1][y]))){
         possible_moves.push_back(Move(board[x][y], x, y, x - 1, y, board[x - 1][y]));
+    }
+
+    //Check if castle possible
+    if(turn){
+        if(white_king_moved){
+            return;
+        }
+        if(!white_queenside_rook_moved){
+            bool castle_available = true;
+            for(uint_fast8_t i = 1; i < 4; ++i){
+                if(board[i][7] || defended_squares[i][7]){
+                    castle_available = false;
+                    break;
+                }
+            }
+            if(castle_available){
+                possible_moves.push_back(Move(6, 4, 7, 2, 7, 0, 8, 8, true));
+            }
+        }
+        if(!white_kingside_rook_moved){
+            bool castle_available = true;
+            for(uint_fast8_t i = 5; i < 7; ++i){
+                if(board[i][7] || defended_squares[i][7]){
+                    castle_available = false;
+                    break;
+                }
+            }
+            if(castle_available){
+                possible_moves.push_back(Move(6, 4, 7, 6, 7, 0, 8, 8, true));
+            }
+        }
+    }
+    else{
+        if(black_king_moved){
+            return;
+        }
+        if(!black_queenside_rook_moved){
+            bool castle_available = true;
+            for(uint_fast8_t i = 1; i < 4; ++i){
+                if(board[i][0] || defended_squares[i][0]){
+                    castle_available = false;
+                    break;
+                }
+            }
+            if(castle_available){
+                possible_moves.push_back(Move(-6, 4, 0, 2, 0, 0, 8, 8, true));
+            }
+        }
+        if(!black_kingside_rook_moved){
+            bool castle_available = true;
+            for(uint_fast8_t i = 5; i < 7; ++i){
+                if(board[i][0] || defended_squares[i][0]){
+                    castle_available = false;
+                    break;
+                }
+            }
+            if(castle_available){
+                possible_moves.push_back(Move(-6, 4, 0, 6, 0, 0, 8, 8, true));
+            }
+        }
     }
 }
 
@@ -421,20 +501,32 @@ void Board::CalculateAdditionalInfoForPiece(uint_fast8_t x, uint_fast8_t y) noex
 
 void Board::CalculateInfoPawn(uint_fast8_t x, uint_fast8_t y) noexcept
 {
-    if(!turn){
+    if(turn){
         if(OnBoard(x + 1, y + 1)){
             defended_squares[x + 1][y + 1] = true;
+            if(board[x + 1][y + 1] == 6){
+                checks.push_back({DIR::DR, Coords{x, y}});
+            }
         }
         if(OnBoard(x - 1, y + 1)){
             defended_squares[x - 1][y + 1] = true;
+            if(board[x - 1][y - 1] == 6){
+                checks.push_back({DIR::DL, Coords{x, y}});
+            }
         }
     }
     else{
         if(OnBoard(x + 1, y - 1)){
             defended_squares[x + 1][y - 1] = true;
+            if(board[x + 1][y - 1] == -6){
+                checks.push_back({DIR::UR, Coords{x, y}});
+            }
         }
         if(OnBoard(x - 1, y - 1)){
             defended_squares[x - 1][y - 1] = true;
+            if(board[x - 1][y - 1] == -6){
+                checks.push_back({DIR::UL, Coords{x, y}});
+            }
         }
     }
 }
@@ -443,27 +535,51 @@ void Board::CalculateInfoKnight(uint_fast8_t x, uint_fast8_t y) noexcept
 {
     if(OnBoard(x + 1, y + 2)){
         defended_squares[x + 1][y + 2] = true;
+        if(board[x + 1][y + 2] == (turn ? 6 : -6)){
+            checks.push_back({DIR::KM, Coords{x, y}});
+        }
     }
     if(OnBoard(x + 1, y - 2)){
         defended_squares[x + 1][y - 2] = true;
+        if(board[x + 1][y - 2] == (turn ? 6 : -6)){
+            checks.push_back({DIR::KM, Coords{x, y}});
+        }
     }
     if(OnBoard(x + 2, y + 1)){
         defended_squares[x + 2][y + 1] = true;
+        if(board[x + 2][y + 1] == (turn ? 6 : -6)){
+            checks.push_back({DIR::KM, Coords{x, y}});
+        }
     }
     if(OnBoard(x + 2, y - 1)){
         defended_squares[x + 2][y - 1] = true;
+        if(board[x + 2][y - 1] == (turn ? 6 : -6)){
+            checks.push_back({DIR::KM, Coords{x, y}});
+        }
     }
     if(OnBoard(x - 2, y + 1)){
         defended_squares[x - 2][y + 1] = true;
+        if(board[x - 2][y + 1] == (turn ? 6 : -6)){
+            checks.push_back({DIR::KM, Coords{x, y}});
+        }
     }
     if(OnBoard(x - 2, y - 1)){
         defended_squares[x - 2][y - 1] = true;
+        if(board[x - 2][y - 1] == (turn ? 6 : -6)){
+            checks.push_back({DIR::KM, Coords{x, y}});
+        }
     }
     if(OnBoard(x - 1, y + 2)){
         defended_squares[x - 1][y + 2] = true;
+        if(board[x - 1][y + 2] == (turn ? 6 : -6)){
+            checks.push_back({DIR::KM, Coords{x, y}});
+        }
     }
     if(OnBoard(x - 1, y - 2)){
         defended_squares[x - 1][y - 2] = true;
+        if(board[x - 1][y - 2] == (turn ? 6 : -6)){
+            checks.push_back({DIR::KM, Coords{x, y}});
+        }
     }
 }
 
@@ -477,18 +593,26 @@ void Board::CalculateInfoBishop(uint_fast8_t x, uint_fast8_t y) noexcept
             defended_squares[nx][ny] = true;
         }
         else if(Opposite(turn, board[nx][ny])){
+            defended_squares[nx][ny] = true;
+            break;
+        }
+        else if(Same(turn, board[nx][ny])){
             if(!met_opposite){
                 met_opposite = true;
                 first_opposite = {nx, ny};
+                if(board[nx][ny] == (turn ? 6 : -6)){
+                    checks.push_back({DIR::UL, Coords{x, y}});
+                    break;
+                }
             }
             else{
-                if(abs(board[nx][ny]) == 6){
+                if(board[nx][ny] == (turn ? 6 : -6)){
                     allowed_moves[first_opposite.x][first_opposite.y].push_back(DIR::DR);
                 }
                 break;
             }
         }
-        nx--; ny--;
+        --nx; --ny;
     }
 
     nx = x + 1, ny = y - 1;
@@ -498,39 +622,55 @@ void Board::CalculateInfoBishop(uint_fast8_t x, uint_fast8_t y) noexcept
             defended_squares[nx][ny] = true;
         }
         else if(Opposite(turn, board[nx][ny])){
+            defended_squares[nx][ny] = true;
+            break;
+        }
+        else if(Same(turn, board[nx][ny])){
             if(!met_opposite){
                 met_opposite = true;
                 first_opposite = {nx, ny};
+                if(board[nx][ny] == (turn ? 6 : -6)){
+                    checks.push_back({DIR::UR, Coords{x, y}});
+                    break;
+                }
             }
             else{
-                if(abs(board[nx][ny]) == 6){
+                if(board[nx][ny] == (turn ? 6 : -6)){
                     allowed_moves[first_opposite.x][first_opposite.y].push_back(DIR::DL);
                 }
                 break;
             }
         }
-        nx++; ny--;
+        ++nx; --ny;
     }
 
-    nx = x, ny = y;
+    nx = x + 1, ny = y + 1;
     met_opposite = false;
     while(OnBoard(nx, ny)){
-        nx++; ny++;
         if(board[nx][ny] == 0){
             defended_squares[nx][ny] = true;
         }
         else if(Opposite(turn, board[nx][ny])){
+            defended_squares[nx][ny] = true;
+            break;
+        }
+        else if(Same(turn, board[nx][ny])){
             if(!met_opposite){
                 met_opposite = true;
                 first_opposite = {nx, ny};
+                if(board[nx][ny] == (turn ? 6 : -6)){
+                    checks.push_back({DIR::DR, Coords{x, y}});
+                    break;
+                }
             }
             else{
-                if(abs(board[nx][ny]) == 6){
+                if(board[nx][ny] == (turn ? 6 : -6)){
                     allowed_moves[first_opposite.x][first_opposite.y].push_back(DIR::UL);
                 }
                 break;
             }
         }
+        ++nx; ++ny;
     }
 
     nx = x - 1, ny = y + 1;
@@ -540,18 +680,26 @@ void Board::CalculateInfoBishop(uint_fast8_t x, uint_fast8_t y) noexcept
             defended_squares[nx][ny] = true;
         }
         else if(Opposite(turn, board[nx][ny])){
+            defended_squares[nx][ny] = true;
+            break;
+        }
+        else if(Same(turn, board[nx][ny])){
             if(!met_opposite){
                 met_opposite = true;
                 first_opposite = {nx, ny};
+                if(board[nx][ny] == (turn ? 6 : -6)){
+                    checks.push_back({DIR::DL, Coords{x, y}});
+                    break;
+                }
             }
             else{
-                if(abs(board[nx][ny]) == 6){
+                if(board[nx][ny] == (turn ? 6 : -6)){
                     allowed_moves[first_opposite.x][first_opposite.y].push_back(DIR::UR);
                 }
                 break;
             }
         }
-        nx--; ny++;
+        --nx; ++ny;
     }
 }
 
@@ -565,18 +713,26 @@ void Board::CalculateInfoRook(uint_fast8_t x, uint_fast8_t y) noexcept
             defended_squares[nx][ny] = true;
         }
         else if(Opposite(turn, board[nx][ny])){
+            defended_squares[nx][ny] = true;
+            break;
+        }
+        else if(Same(turn, board[nx][ny])){
             if(!met_opposite){
                 met_opposite = true;
                 first_opposite = {nx, ny};
+                if(board[nx][ny] == (turn ? 6 : -6)){
+                    checks.push_back({DIR::L, Coords{x, y}});
+                    break;
+                }
             }
             else{
-                if(abs(board[nx][ny]) == 6){
+                if(board[nx][ny] == (turn ? 6 : -6)){
                     allowed_moves[first_opposite.x][first_opposite.y].push_back(DIR::R);
                 }
                 break;
             }
         }
-        nx--;
+        --nx;
     }
 
     nx = x + 1;
@@ -586,18 +742,26 @@ void Board::CalculateInfoRook(uint_fast8_t x, uint_fast8_t y) noexcept
             defended_squares[nx][ny] = true;
         }
         else if(Opposite(turn, board[nx][ny])){
+            defended_squares[nx][ny] = true;
+            break;
+        }
+        else if(Same(turn, board[nx][ny])){
             if(!met_opposite){
                 met_opposite = true;
                 first_opposite = {nx, ny};
+                if(board[nx][ny] == (turn ? 6 : -6)){
+                    checks.push_back({DIR::R, Coords{x, y}});
+                    break;
+                }
             }
             else{
-                if(abs(board[nx][ny]) == 6){
+                if(board[nx][ny] == (turn ? 6 : -6)){
                     allowed_moves[first_opposite.x][first_opposite.y].push_back(DIR::L);
                 }
                 break;
             }
         }
-        nx++;
+        ++nx;
     }
 
     nx = x; ny = y - 1;
@@ -607,39 +771,55 @@ void Board::CalculateInfoRook(uint_fast8_t x, uint_fast8_t y) noexcept
             defended_squares[nx][ny] = true;
         }
         else if(Opposite(turn, board[nx][ny])){
+            defended_squares[nx][ny] = true;
+            break;
+        }
+        else if(Same(turn, board[nx][ny])){
             if(!met_opposite){
                 met_opposite = true;
                 first_opposite = {nx, ny};
+                if(board[nx][ny] == (turn ? 6 : -6)){
+                    checks.push_back({DIR::U, Coords{x, y}});
+                    break;
+                }
             }
             else{
-                if(abs(board[nx][ny]) == 6){
+                if(board[nx][ny] == (turn ? 6 : -6)){
                     allowed_moves[first_opposite.x][first_opposite.y].push_back(DIR::D);
                 }
                 break;
             }
         }
-        ny--;
+        --ny;
     }
 
-    ny = y + 1; nx = x;
+    ny = y + 1;
     met_opposite = false;
     while(OnBoard(nx, ny)){
         if(board[nx][ny] == 0){
             defended_squares[nx][ny] = true;
         }
         else if(Opposite(turn, board[nx][ny])){
+            defended_squares[nx][ny] = true;
+            break;
+        }
+        else if(Same(turn, board[nx][ny])){
             if(!met_opposite){
                 met_opposite = true;
                 first_opposite = {nx, ny};
+                if(board[nx][ny] == (turn ? 6 : -6)){
+                    checks.push_back({DIR::D, Coords{x, y}});
+                    break;
+                }
             }
             else{
-                if(abs(board[nx][ny]) == 6){
+                if(board[nx][ny] == (turn ? 6 : -6)){
                     allowed_moves[first_opposite.x][first_opposite.y].push_back(DIR::U);
                 }
                 break;
             }
         }
-        ny++;
+        ++ny;
     }
 }
 
@@ -651,28 +831,28 @@ void Board::CalculateInfoQueen(uint_fast8_t x, uint_fast8_t y) noexcept
 
 void Board::CalculateInfoKing(uint_fast8_t x, uint_fast8_t y) noexcept
 {
-    if(OnBoard(x - 1, y - 1) && !board[x - 1][y - 1]){
+    if(OnBoard(x - 1, y - 1)){
         defended_squares[x - 1][y - 1] = true;
     }
-    else if(OnBoard(x - 1, y + 1) && !board[x - 1][y + 1]){
+    if(OnBoard(x - 1, y + 1)){
         defended_squares[x - 1][y + 1] = true;
     }
-    else if(OnBoard(x + 1, y + 1) && !board[x + 1][y + 1]){
+    if(OnBoard(x + 1, y + 1)){
         defended_squares[x + 1][y + 1] = true;
     }
-    else if(OnBoard(x + 1, y - 1) && !board[x + 1][y - 1]){
+    if(OnBoard(x + 1, y - 1)){
         defended_squares[x + 1][y - 1] = true;
     }
-    else if(OnBoard(x, y + 1) && !board[x][y + 1]){
+    if(OnBoard(x, y + 1)){
         defended_squares[x][y + 1] = true;
     }
-    else if(OnBoard(x, y - 1) && !board[x][y - 1]){
+    if(OnBoard(x, y - 1)){
         defended_squares[x][y - 1] = true;
     }
-    else if(OnBoard(x + 1, y) && !board[x + 1][y]){
+    if(OnBoard(x + 1, y)){
         defended_squares[x + 1][y] = true;
     }
-    else if(OnBoard(x - 1, y) && !board[x - 1][y]){
+    if(OnBoard(x - 1, y)){
         defended_squares[x - 1][y] = true;
     }
 }
@@ -773,6 +953,28 @@ bool Board::CheckIfMoveIsAllowed(uint_fast8_t x, uint_fast8_t y, Direction::Dir 
     return false;
 }
 
+bool Board::IsCheck() const noexcept
+{
+    return !checks.empty();
+}
+
+uint_fast8_t Board::ChecksAmount() const noexcept
+{
+    return checks.size();
+}
+
+//NOTE: if idx is invalid, it'll cause runtime error since there's no check for idx being out of checks array range
+std::pair<DIR, Coords>& Board::GetCheckByIdx(uint_fast8_t idx) noexcept
+{
+    //return const_cast<std::pair<Direction::Dir, Coords>&>(checks[idx]);
+    return checks[idx];
+}
+
+bool Board::IsCheckmate() const noexcept
+{
+    return IsCheck() && possible_moves.empty();
+}
+
 bool Board::CheckIfPieceWakable(int x, int y) const noexcept
 {
     return Same(turn, board[x][y]);
@@ -791,7 +993,12 @@ bool Board::IsLegalMove(int x1, int y1, int x2, int y2) const noexcept
 void Board::ApplyUserMove(int x1, int y1, int x2, int y2)
 {
     Move user_move(board[x1][y1], x1, y1, x2, y2, board[x2][y2]);
-    RunMove(user_move);
+    for(auto& move : possible_moves){
+        if(move.x1 == x1 && move.y1 == y1 && move.x2 == x2 && move.y2 == y2){
+            RunMove(move);
+            break;
+        }
+    }
 }
 
 void Board::RunMove(Move &move)
@@ -801,10 +1008,67 @@ void Board::RunMove(Move &move)
         board[move.ep_x][move.ep_y] = 0;
     }
 
+    if(turn){
+        if(!white_king_moved && move.piece == 6){
+            white_king_moved = true;
+        }
+        if(move.piece == 4){
+            if(!white_kingside_rook_moved && move.x1 == 7){
+                white_kingside_rook_moved = true;
+            }
+            if(!white_queenside_rook_moved && move.x1 == 0){
+                white_queenside_rook_moved = true;
+            }
+        }
+    }
+    else{
+        if(!black_king_moved && move.piece == -6){
+            black_king_moved = true;
+        }
+        if(move.piece == -4){
+            if(!black_kingside_rook_moved && move.x1 == 7){
+                black_kingside_rook_moved = true;
+            }
+            if(!black_queenside_rook_moved && move.x1 == 0){
+                black_queenside_rook_moved = true;
+            }
+        }
+    }
+
+    if(move.castle){
+        if(turn && move.x2 == 6){
+            white_kingside_rook_moved = true;
+            white_king_moved = true;
+            board[7][7] = 0;
+            board[5][7] = 4;
+        }
+        else if(turn && move.x2 == 2){
+            white_queenside_rook_moved = true;
+            white_king_moved = true;
+            board[0][7] = 0;
+            board[3][7] = 4;
+        }
+        else if(!turn && move.x2 == 2){
+            black_queenside_rook_moved = true;
+            black_king_moved = true;
+            board[7][0] = 0;
+            board[5][0] = -4;
+        }
+        else if(!turn && move.x2 == 6){
+            black_kingside_rook_moved = true;
+            black_king_moved = true;
+            board[0][0] = 0;
+            board[3][0] = -4;
+        }
+    }
+
     board[move.x2][move.y2] = board[move.x1][move.y1];
     board[move.x1][move.y1] = 0;
 
     total_turns++;
+    turn = !turn;
+    moves_played.push_back(move);
+
     CalculatePossibleMoves();
 }
 
@@ -844,9 +1108,44 @@ Direction::Dir Direction::CalculateDir(Coords from, Coords to) noexcept
     if(x_diff > 0 && y_diff == 0){
         return DIR::L;
     }
+    //from == to
+    if(x_diff == 0 && y_diff == 0){
+        return DIR::NONE;
+    }
 
     //Everything else is considered a knight move
     return DIR::KM;
+}
+
+//Returns opposite direction if type of direction is diagonal, horizontal or vertical otherwise returns given direction
+Direction::Dir Direction::Opposite(Dir &dir) noexcept
+{
+    if(dir == DIR::D){
+        return DIR::U;
+    }
+    if(dir == DIR::DL){
+        return DIR::UR;
+    }
+    if(dir == DIR::DR){
+        return DIR::UL;
+    }
+    if(dir == DIR::L){
+        return DIR::R;
+    }
+    if(dir == DIR::R){
+        return DIR::R;
+    }
+    if(dir == DIR::U){
+        return DIR::D;
+    }
+    if(dir == DIR::UL){
+        return DIR::DR;
+    }
+    if(dir == DIR::UR){
+        return DIR::DL;
+    }
+
+    return dir;
 }
 
 bool Coords::Valid() const noexcept

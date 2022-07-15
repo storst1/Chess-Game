@@ -25,8 +25,9 @@ struct Coords{
 
 class Direction{
 public:
-    enum Dir{U, UR, R, DR, D, DL, L, UL, KM};
-    static Dir CalculateDir(Coords from, Coords to) noexcept;
+    enum Dir{U, UR, R, DR, D, DL, L, UL, KM, NONE};
+    static DIR CalculateDir(Coords from, Coords to) noexcept;
+    static DIR Opposite(Dir& dir) noexcept;
 };
 
 class Board
@@ -41,16 +42,20 @@ public:
     inline int_fast8_t& Get(uint_fast8_t x, uint_fast8_t y) noexcept;
     int_fast8_t At(uint_fast8_t x, uint_fast8_t y) const;
     Move& LastMove();
-
+    Coords FindKing(bool color) const noexcept;
     void CalculatePossibleMoves() noexcept;
     bool CheckIfSquareDefended(uint_fast8_t x, uint_fast8_t y) const noexcept;
     bool CheckIfMoveIsAllowed(uint_fast8_t x, uint_fast8_t y, DIR& dir) const noexcept;
+    bool IsCheck() const noexcept;
+    uint_fast8_t ChecksAmount() const noexcept;
+    std::pair<DIR, Coords>& GetCheckByIdx(uint_fast8_t idx) noexcept;
+    bool IsCheckmate() const noexcept;
 
     static bool OnBoard(uint_fast8_t x, uint_fast8_t y) noexcept;
     static QPixmap GetPiecePixmap(int_fast8_t type) noexcept;
 
     //API for window class to interact with a user
-    void DrawBoard(QPainter *painter, int cx, int cy) const noexcept;
+    void DrawBoard(QPainter *painter, int cx = -1, int cy = -1) const noexcept;
     bool CheckIfPieceWakable(int x, int y) const noexcept;
     bool IsLegalMove(int x1, int y1, int x2, int y2) const noexcept;
     void ApplyUserMove(int x1, int y1, int x2, int y2);
@@ -95,11 +100,20 @@ private:
     bool defended_squares[8][8];
     std::vector<std::vector<std::vector<DIR>>> allowed_moves;
     std::vector<Move> moves_played;
+    bool black_king_moved = false;
+    bool white_king_moved = false;
+    bool black_kingside_rook_moved = false;
+    bool black_queenside_rook_moved = false;
+    bool white_kingside_rook_moved = false;
+    bool white_queenside_rook_moved = false;
+    std::vector<std::pair<DIR, Coords>> checks;
 
+    //Constant fields
     const QColor black_square = QColor(209, 139, 71);
     const QColor white_square = QColor(255, 206, 158);
     const QColor highlighted_square = QColor(1, 241, 254);
     const QColor current_square = QColor(255, 252, 128);
+    const QColor check_on_king_square = QColor(255, 0, 0);
     const int sp = 100; //square pixels
 };
 

@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->checkmate_label->hide();
     lay = new QGridLayout(ui->centralwidget);
     pixmap = new QPixmap(800, 800);
     painter = new QPainter(pixmap);
@@ -37,6 +38,14 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
     if(chosen_x != -1 && board.IsLegalMove(chosen_x, chosen_y, i, j)){
         //Make move
         board.ApplyUserMove(chosen_x, chosen_y, i, j);
+        if(board.IsCheckmate()){
+            ui->checkmate_label->show();
+        }
+        chosen_x = -1;
+        board.DrawBoard(painter);
+        main_label->setPixmap(*pixmap);
+        main_label->update();
+        return;
     }
 
     if(board.CheckIfPieceWakable(i, j)){

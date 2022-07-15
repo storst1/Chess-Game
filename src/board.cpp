@@ -503,7 +503,7 @@ void Board::CalculateInfoPawn(uint_fast8_t x, uint_fast8_t y) noexcept
         }
         if(OnBoard(x - 1, y + 1)){
             defended_squares[x - 1][y + 1] = true;
-            if(board[x - 1][y - 1] == 6){
+            if(board[x - 1][y + 1] == 6){
                 checks.push_back({DIR::DL, Coords{x, y}});
             }
         }

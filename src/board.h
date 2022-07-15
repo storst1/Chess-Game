@@ -37,9 +37,9 @@ public:
     Board(const Board& parent) noexcept;
     ~Board() = default;
 
-    inline bool Turn() const noexcept;
-    inline int_fast8_t TotalTurns() const noexcept;
-    inline int_fast8_t& Get(uint_fast8_t x, uint_fast8_t y) noexcept;
+    bool Turn() const noexcept;
+    int_fast8_t TotalTurns() const noexcept;
+    int_fast8_t& Get(uint_fast8_t x, uint_fast8_t y) noexcept;
     int_fast8_t At(uint_fast8_t x, uint_fast8_t y) const;
     Move& LastMove();
     Coords FindKing(bool color) const noexcept;
@@ -79,7 +79,7 @@ private:
     void CalculateInfoKing(uint_fast8_t x, uint_fast8_t y) noexcept;
 
     bool Opposite(bool turn, int_fast8_t square) const noexcept;
-    inline bool Same(bool turn, int_fast8_t square) const noexcept;
+    bool Same(bool turn, int_fast8_t square) const noexcept;
     void ClearAllowedMoves() noexcept;
     void ClearDefendedSquares() noexcept;
 private:
@@ -107,6 +107,8 @@ private:
     bool white_kingside_rook_moved = false;
     bool white_queenside_rook_moved = false;
     std::vector<std::pair<DIR, Coords>> checks;
+    Coords black_king_coors{4, 0};
+    Coords white_king_coords{4, 7};
 
     //Constant fields
     const QColor black_square = QColor(209, 139, 71);

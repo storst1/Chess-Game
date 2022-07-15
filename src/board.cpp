@@ -93,14 +93,7 @@ Move &Board::LastMove()
 
 Coords Board::FindKing(bool color) const noexcept
 {
-    for(int i = 0; i < 8; ++i){
-        for(int j =  0; j < 8; ++j){
-            if(abs(board[i][j]) == 6 && Same(color, board[i][j])){
-                return Coords{(uint_fast8_t)i, (uint_fast8_t)j};
-            }
-        }
-    }
-    return Coords{(uint_fast8_t)255, (uint_fast8_t)255};
+    return (color ? white_king_coords : black_king_coors);
 }
 
 //Calculates all the possible moves on the board for the color that ows the current turn
@@ -869,7 +862,7 @@ bool Board::Opposite(bool turn, int_fast8_t square) const noexcept
     return false;
 }
 
-inline bool Board::Same(bool turn, int_fast8_t square) const noexcept
+bool Board::Same(bool turn, int_fast8_t square) const noexcept
 {
     return !Opposite(turn, square);
 }
@@ -1060,6 +1053,10 @@ void Board::RunMove(Move &move)
             board[0][0] = 0;
             board[3][0] = -4;
         }
+    }
+
+    if(abs(move.piece) == 6){
+        (turn ? white_king_coords : black_king_coors) = {move.x2, move.y2};
     }
 
     board[move.x2][move.y2] = board[move.x1][move.y1];

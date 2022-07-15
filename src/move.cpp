@@ -66,6 +66,10 @@ void PossibleMovesVector::push_back(Move move)
             if(!(dir_after_move_relative_to_threat == DIR::NONE || dir_after_move_relative_to_threat == Direction::Opposite(check_info.first))){
                 return;
             }
+            DIR dir_after_move_relative_to_own_king = Direction::CalculateDir(move.ToCoords(), (board.Turn() ? board.FindKing(true) : board.FindKing(false)));
+            if(dir_after_move_relative_to_own_king == Direction::Opposite(check_info.first)){
+                return;
+            }
         }
     }
 
@@ -85,7 +89,28 @@ void PossibleMovesVector::push_back(Move move)
 
 void PossibleMovesVector::push_back(Move &move)
 {
-    if(move.piece == 6){
+    if(board.IsCheck()){
+        if(board.ChecksAmount() > 1 && abs(move.piece) != 6){
+            return;
+        }
+
+        std::pair<DIR, Coords>& check_info = board.GetCheckByIdx(0);
+        if(check_info.first == DIR::KM && abs(move.piece) != 6){
+            return;
+        }
+        if(board.ChecksAmount() == 1 && abs(move.piece) != 6){
+            DIR dir_after_move_relative_to_threat = Direction::CalculateDir(move.ToCoords(), check_info.second);
+            if(!(dir_after_move_relative_to_threat == DIR::NONE || dir_after_move_relative_to_threat == Direction::Opposite(check_info.first))){
+                return;
+            }
+            DIR dir_after_move_relative_to_own_king = Direction::CalculateDir(move.ToCoords(), (board.Turn() ? board.FindKing(true) : board.FindKing(false)));
+            if(dir_after_move_relative_to_own_king == Direction::Opposite(check_info.first)){
+                return;
+            }
+        }
+    }
+
+    if(abs(move.piece) == 6){
         if(board.CheckIfSquareDefended(move.x2, move.y2)){
             return;
         }

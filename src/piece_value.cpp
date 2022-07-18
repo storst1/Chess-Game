@@ -3,7 +3,7 @@
 PieceValue::PieceValue()
 {
     QFile file;
-    file.setFileName("piece_value.json");
+    file.setFileName(":/piece_value.json");
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     QString text = file.readAll();
     file.close();
@@ -11,13 +11,11 @@ PieceValue::PieceValue()
     QJsonObject json_main_obj = json_text.object();
 
     pawn_cost = json_main_obj["pawn"].toInt();
-    knight_cost = json_main_obj["kngiht"].toInt();
+    knight_cost = json_main_obj["knight"].toInt();
     bishop_cost = json_main_obj["bishop"].toInt();
     rook_cost = json_main_obj["rook"].toInt();
     queen_cost = json_main_obj["queen"].toInt();
     king_cost = json_main_obj["king"].toInt();
-
-    qDebug() << knight_cost;
 }
 
 int PieceValue::GetPieceValue(int_fast8_t piece)

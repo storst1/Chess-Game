@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>piece_value.json</file>
+    </qresource>
+</RCC>

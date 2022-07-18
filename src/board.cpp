@@ -1,11 +1,11 @@
 #include "board.h"
+#include "engine.h"
 
 Board::Board() noexcept : possible_moves(*this)
 {
     possible_moves.reserve(50);
     moves_played.reserve(150);
     allowed_moves.resize(8, std::vector<std::vector<DIR>> (8, std::vector<DIR>(0)));
-    Move m(6, 4, 7, 2, 7, 0, 8, 8, true);
 }
 
 Board::Board(const Board &parent) noexcept

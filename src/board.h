@@ -16,6 +16,8 @@
 
 #include "move.h"
 
+class Engine;
+
 struct Coords{
     uint_fast8_t x;
     uint_fast8_t y;

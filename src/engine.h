@@ -13,8 +13,10 @@ public:
     void SetDepth(uint_fast8_t new_depth);
 
     int EvaluatePosition() noexcept;
+    Move& BestNextMove() noexcept;
 private:
     int AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left) noexcept;
+    int Quiesce(int alpha, int beta) noexcept;
 private:
     Board board;
     uint_fast8_t depth = 8;

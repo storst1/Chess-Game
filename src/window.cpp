@@ -42,21 +42,31 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
             ui->checkmate_label->show();
         }
         chosen_x = -1;
-        board.DrawBoard(painter);
-        main_label->setPixmap(*pixmap);
-        main_label->update();
+        DrawAndUpdateBoard();
+        if(game_mode == 1){
+            //Make AI move
+            Engine engine(board);
+            Move& best_move = engine.BestNextMove();
+            board.RunMove(best_move);
+            DrawAndUpdateBoard();
+        }
         return;
     }
 
     if(board.CheckIfPieceWakable(i, j)){
         chosen_x = i;
         chosen_y = j;
-        board.DrawBoard(painter, i, j);
-        main_label->setPixmap(*pixmap);
-        main_label->update();
+        DrawAndUpdateBoard(i, j);
     }
     else{
         chosen_x = -1;
     }
+}
+
+void MainWindow::DrawAndUpdateBoard(int i, int j)
+{
+    board.DrawBoard(painter, i, j);
+    main_label->setPixmap(*pixmap);
+    main_label->update();
 }
 

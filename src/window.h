@@ -8,7 +8,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 
-#include "board.h"
+#include "engine.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -24,6 +24,8 @@ public:
 
     void mousePressEvent(QMouseEvent *event);
 private:
+    void DrawAndUpdateBoard(int i = -1, int j = -1);
+private:
     Ui::MainWindow *ui;
     QGridLayout* lay;
     QLabel* main_label;
@@ -32,5 +34,6 @@ private:
     Board board;
     int chosen_x = -1;
     int chosen_y = -1;
+    int game_mode = 1;
 };
 #endif // MAINWINDOW_H

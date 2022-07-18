@@ -59,9 +59,11 @@ public:
     bool CheckIfPieceWakable(int x, int y) const noexcept;
     bool IsLegalMove(int x1, int y1, int x2, int y2) const noexcept;
     void ApplyUserMove(int x1, int y1, int x2, int y2);
+    //API for engine
+    PossibleMovesVector& PossibleMovesRef() noexcept;
+    void RunMove(const Move &move);
+    void RevertLastMove() noexcept;
 private:
-    void RunMove(Move& move);
-
     void CalculateMoves(uint_fast8_t x, uint_fast8_t y) noexcept;
     void CalculatePawnMoves(uint_fast8_t x, uint_fast8_t y) noexcept;
     void CalculateKnightMoves(uint_fast8_t x, uint_fast8_t y) noexcept;

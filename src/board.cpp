@@ -12,11 +12,22 @@ Board::Board(const Board &parent) noexcept
     : turn(parent.turn),
       total_turns(parent.total_turns),
       possible_moves(parent.possible_moves),
-      moves_played(parent.moves_played)
+      allowed_moves(parent.allowed_moves),
+      moves_played(parent.moves_played),
+      black_king_moved(parent.black_king_moved),
+      white_king_moved(parent.white_king_moved),
+      black_kingside_rook_moved(parent.black_kingside_rook_moved),
+      black_queenside_rook_moved(parent.black_queenside_rook_moved),
+      white_kingside_rook_moved(parent.white_kingside_rook_moved),
+      white_queenside_rook_moved(parent.white_queenside_rook_moved),
+      checks(parent.checks),
+      black_king_coors(parent.black_king_coors),
+      white_king_coords(parent.white_king_coords)
 {
     for(int i = 0; i < 8; ++i){
         for(int j = 0; j < 8; ++j){
             board[i][j] = parent.board[i][j];
+            defended_squares[i][j] = parent.defended_squares[i][j];
         }
     }
 }
@@ -118,6 +129,7 @@ void Board::CalculatePossibleMoves() noexcept
     }
 }
 
+//This method checks if given pair (x, y) represents valid coordinates on the board
 bool Board::OnBoard(uint_fast8_t x, uint_fast8_t y) noexcept
 {
     if(x > 7 || y > 7){
@@ -994,7 +1006,12 @@ void Board::ApplyUserMove(int x1, int y1, int x2, int y2)
     }
 }
 
-void Board::RunMove(Move &move)
+PossibleMovesVector &Board::PossibleMovesRef() noexcept
+{
+    return possible_moves;
+}
+
+void Board::RunMove(const Move &move)
 {
     //En passant case
     if(move.ep_x != 8){
@@ -1062,9 +1079,86 @@ void Board::RunMove(Move &move)
     board[move.x2][move.y2] = board[move.x1][move.y1];
     board[move.x1][move.y1] = 0;
 
-    total_turns++;
+    ++total_turns;
     turn = !turn;
     moves_played.push_back(move);
+
+    CalculatePossibleMoves();
+}
+
+//Reverts last move assuming that that it does excist without checking for it
+void Board::RevertLastMove() noexcept
+{
+    Move& move = moves_played.back();
+
+    //En passant case
+    if(move.ep_x != 8){
+        board[move.ep_x][move.ep_y] = move.captured;
+    }
+
+    if(!turn){
+        if(!white_king_moved && move.piece == 6){
+            white_king_moved = false;
+        }
+        if(move.piece == 4){
+            if(!white_kingside_rook_moved && move.x1 == 7){
+                white_kingside_rook_moved = false;
+            }
+            if(!white_queenside_rook_moved && move.x1 == 0){
+                white_queenside_rook_moved = false;
+            }
+        }
+    }
+    else{
+        if(!black_king_moved && move.piece == -6){
+            black_king_moved = false;
+        }
+        if(move.piece == -4){
+            if(!black_kingside_rook_moved && move.x1 == 7){
+                black_kingside_rook_moved = false;
+            }
+            if(!black_queenside_rook_moved && move.x1 == 0){
+                black_queenside_rook_moved = false;
+            }
+        }
+    }
+
+    if(move.castle){
+        if(!turn && move.x2 == 6){
+            white_kingside_rook_moved = false;
+            white_king_moved = false;
+            board[7][7] = 4;
+            board[5][7] = 0;
+        }
+        else if(!turn && move.x2 == 2){
+            white_queenside_rook_moved = false;
+            white_king_moved = false;
+            board[0][7] = 4;
+            board[3][7] = 0;
+        }
+        else if(turn && move.x2 == 2){
+            black_queenside_rook_moved = false;
+            black_king_moved = false;
+            board[7][0] = -4;
+            board[5][0] = 0;
+        }
+        else if(turn && move.x2 == 6){
+            black_kingside_rook_moved = false;
+            black_king_moved = false;
+            board[0][0] = -4;
+            board[3][0] = 0;
+        }
+    }
+
+    if(abs(move.piece) == 6){
+        (!turn ? white_king_coords : black_king_coors) = {move.x1, move.y1};
+    }
+
+    board[move.x1][move.y1] = board[move.x2][move.y2];
+    board[move.x2][move.y2] = move.captured;
+
+    --total_turns;
+    turn = !turn;
 
     CalculatePossibleMoves();
 }

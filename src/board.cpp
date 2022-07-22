@@ -1159,6 +1159,7 @@ void Board::RevertLastMove() noexcept
 
     --total_turns;
     turn = !turn;
+    moves_played.pop_back();
 
     CalculatePossibleMoves();
 }

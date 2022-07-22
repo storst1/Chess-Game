@@ -18,7 +18,7 @@ public:
     Move& BestNextMove() noexcept;
 private:
     std::pair<int, Move&> AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left, bool initial_turn) noexcept;
-    int Quiesce(int alpha, int beta) noexcept;
+    int Quiesce(int alpha, int beta, bool initial_turn) noexcept;
 private:
     Board board;
     uint_fast8_t depth = 8;

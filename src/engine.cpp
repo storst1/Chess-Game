@@ -31,12 +31,13 @@ Move &Engine::BestNextMove() noexcept
 std::pair<int, Move &> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left, bool initial_turn) noexcept
 {
     if(depth_left == 0){
-        return {Quiesce(alpha, beta), default_move};
+        return {Quiesce(alpha, beta, initial_turn), default_move};
     }
 
     Move& best_move = *board.PossibleMovesRef().begin();
+    int value;
     if(board.Turn() == initial_turn){
-        int value = -INF;
+        value = -INF;
         for(const auto& move : board.PossibleMovesRef()){
             board.RunMove(move);
             int score = AlphaBetaSearch(alpha, beta, depth_left - 1, initial_turn).first;
@@ -48,11 +49,11 @@ std::pair<int, Move &> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t
                 break;
             }
             alpha = std::max(alpha, value);
+            board.RevertLastMove();
         }
-        return {value, best_move};
     }
     else{
-        int value = INF;
+        value = INF;
         for(const auto& move : board.PossibleMovesRef()){
             board.RunMove(move);
             int score = AlphaBetaSearch(alpha, beta, depth_left - 1, initial_turn).first;
@@ -64,38 +65,60 @@ std::pair<int, Move &> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t
                 break;
             }
             beta = std::min(beta, value);
+            board.RevertLastMove();
         }
-        return {value, best_move};
     }
+    return {value, best_move};
 }
 
-int Engine::Quiesce(int alpha, int beta) noexcept
+int Engine::Quiesce(int alpha, int beta, bool initial_turn) noexcept
 {
-    int standing_pat = EvaluatePosition();
-    if(standing_pat >= beta){
-        return beta;
-    }
-    if(alpha < standing_pat){
-        alpha = standing_pat;
-    }
+    bool further_positions = false;
+    int value;
+    if(board.Turn() == initial_turn){
+        value = -INF;
+        for(const auto& move : board.PossibleMovesRef()){
+            //Do not consider and skip non-capture moves
+            if(!(move.captured != 0 || move.ep_x != 8)){
+                continue;
+            }
 
-    for(const auto& move : board.PossibleMovesRef()){
-        //Do not consider and skip non-capture moves
-        if(!(move.captured != 0 || move.ep_x != 8)){
-            continue;
+            further_positions = true;
+
+            board.RunMove(move);
+            int score = Quiesce(alpha, beta, initial_turn);
+            if(score > value){
+                value = score;
+            }
+            if(value >= beta){
+                break;
+            }
+            alpha = std::max(alpha, value);
+            board.RevertLastMove();
         }
-
-        board.RunMove(move);
-        int score = -Quiesce(-beta, -alpha);
-
-        if(score >= beta){
-            return beta;
-        }
-        if(score > alpha){
-            alpha = score;
-        }
-
-        board.RevertLastMove();
     }
-    return alpha;
+    else{
+        value = INF;
+        for(const auto& move : board.PossibleMovesRef()){
+            //Do not consider and skip non-capture moves
+            if(!(move.captured != 0 || move.ep_x != 8)){
+                continue;
+            }
+
+            further_positions = true;
+
+            board.RunMove(move);
+            int score = Quiesce(alpha, beta, initial_turn);
+            if(score < value){
+                value = score;
+            }
+            if(value <= alpha){
+                break;
+            }
+            beta = std::min(beta, value);
+            board.RevertLastMove();
+        }
+    }
+
+    return (further_positions ? value : EvaluatePosition());
 }

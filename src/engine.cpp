@@ -25,43 +25,48 @@ int Engine::EvaluatePosition() noexcept
 //Assumes that there're possible moves in given position
 Move &Engine::BestNextMove() noexcept
 {
-    int alpha = INT_MIN;
-    int beta = INT_MAX;
-    Move& best_move = *board.PossibleMovesRef().begin();
-
-    for(const auto& move : board.PossibleMovesRef()){
-        board.RunMove(move);
-        int score = -AlphaBetaSearch(-beta, -alpha, depth - 1);
-
-        if(score > alpha){
-            alpha = score;
-            best_move = move;
-        }
-
-        board.RevertLastMove();
-    }
-    return best_move;
+    return AlphaBetaSearch(-INF, INF, depth, board.Turn()).second;
 }
 
-int Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left) noexcept
+std::pair<int, Move &> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left, bool initial_turn) noexcept
 {
     if(depth_left == 0){
-        return Quiesce(alpha, beta);
+        return {Quiesce(alpha, beta), default_move};
     }
-    for(const auto& cur_move : board.PossibleMovesRef()){
-        board.RunMove(cur_move);
-        int score = -AlphaBetaSearch(-beta, -alpha, depth_left - 1);
 
-        if(score >= beta){
-            return beta;
+    Move& best_move = *board.PossibleMovesRef().begin();
+    if(board.Turn() == initial_turn){
+        int value = -INF;
+        for(const auto& move : board.PossibleMovesRef()){
+            board.RunMove(move);
+            int score = AlphaBetaSearch(alpha, beta, depth_left - 1, initial_turn).first;
+            if(score > value){
+                value = score;
+                best_move = move;
+            }
+            if(value >= beta){
+                break;
+            }
+            alpha = std::max(alpha, value);
         }
-        if(score > alpha){
-            alpha = score;
-        }
-
-        board.RevertLastMove();
+        return {value, best_move};
     }
-    return alpha;
+    else{
+        int value = INF;
+        for(const auto& move : board.PossibleMovesRef()){
+            board.RunMove(move);
+            int score = AlphaBetaSearch(alpha, beta, depth_left - 1, initial_turn).first;
+            if(score < value){
+                value = score;
+                best_move = move;
+            }
+            if(value <= alpha){
+                break;
+            }
+            beta = std::min(beta, value);
+        }
+        return {value, best_move};
+    }
 }
 
 int Engine::Quiesce(int alpha, int beta) noexcept

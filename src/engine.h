@@ -1,6 +1,8 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#define INF INT_MAX
+
 #include "board.h"
 #include "piece_value.h"
 
@@ -15,12 +17,13 @@ public:
     int EvaluatePosition() noexcept;
     Move& BestNextMove() noexcept;
 private:
-    int AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left) noexcept;
+    std::pair<int, Move&> AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left, bool initial_turn) noexcept;
     int Quiesce(int alpha, int beta) noexcept;
 private:
     Board board;
     uint_fast8_t depth = 8;
     PieceValue piece_value;
+    Move default_move{9, 9, 9, 9, 9, 9};
 };
 
 #endif // ENGINE_H

@@ -121,6 +121,8 @@ private:
     const QColor current_square = QColor(255, 252, 128);
     const QColor check_on_king_square = QColor(255, 0, 0);
     const int sp = 100; //square pixels
+    const size_t possible_moves_capacity = 60;
+    const size_t moves_played_capacity = 200;
 };
 
 #endif // BOARD_H

@@ -41,6 +41,7 @@ std::pair<int, Move &> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t
         for(const auto& move : board.PossibleMovesRef()){
             board.RunMove(move);
             int score = AlphaBetaSearch(alpha, beta, depth_left - 1, initial_turn).first;
+            board.RevertLastMove();
             if(score > value){
                 value = score;
                 best_move = move;
@@ -49,7 +50,6 @@ std::pair<int, Move &> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t
                 break;
             }
             alpha = std::max(alpha, value);
-            board.RevertLastMove();
         }
     }
     else{
@@ -57,6 +57,7 @@ std::pair<int, Move &> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t
         for(const auto& move : board.PossibleMovesRef()){
             board.RunMove(move);
             int score = AlphaBetaSearch(alpha, beta, depth_left - 1, initial_turn).first;
+            board.RevertLastMove();
             if(score < value){
                 value = score;
                 best_move = move;
@@ -65,7 +66,6 @@ std::pair<int, Move &> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t
                 break;
             }
             beta = std::min(beta, value);
-            board.RevertLastMove();
         }
     }
     return {value, best_move};
@@ -87,6 +87,7 @@ int Engine::Quiesce(int alpha, int beta, bool initial_turn) noexcept
 
             board.RunMove(move);
             int score = Quiesce(alpha, beta, initial_turn);
+            board.RevertLastMove();
             if(score > value){
                 value = score;
             }
@@ -94,7 +95,6 @@ int Engine::Quiesce(int alpha, int beta, bool initial_turn) noexcept
                 break;
             }
             alpha = std::max(alpha, value);
-            board.RevertLastMove();
         }
     }
     else{
@@ -109,6 +109,7 @@ int Engine::Quiesce(int alpha, int beta, bool initial_turn) noexcept
 
             board.RunMove(move);
             int score = Quiesce(alpha, beta, initial_turn);
+            board.RevertLastMove();
             if(score < value){
                 value = score;
             }
@@ -116,7 +117,6 @@ int Engine::Quiesce(int alpha, int beta, bool initial_turn) noexcept
                 break;
             }
             beta = std::min(beta, value);
-            board.RevertLastMove();
         }
     }
 

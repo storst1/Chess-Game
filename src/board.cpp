@@ -3,8 +3,8 @@
 
 Board::Board() noexcept : possible_moves(*this)
 {
-    possible_moves.reserve(50);
-    moves_played.reserve(150);
+    possible_moves.reserve(possible_moves_capacity);
+    moves_played.reserve(moves_played_capacity);
     allowed_moves.resize(8, std::vector<std::vector<DIR>> (8, std::vector<DIR>(0)));
 }
 

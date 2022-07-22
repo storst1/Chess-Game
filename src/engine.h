@@ -21,7 +21,7 @@ private:
     int Quiesce(int alpha, int beta, bool initial_turn) noexcept;
 private:
     Board board;
-    uint_fast8_t depth = 8;
+    uint_fast8_t depth = 3;
     PieceValue piece_value;
     Move default_move{9, 9, 9, 9, 9, 9};
 };

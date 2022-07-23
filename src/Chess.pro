@@ -9,6 +9,7 @@ SOURCES += \
     board/coords.cpp \
     board/direction.cpp \
     board/move.cpp \
+    board/possible_moves_vector.cpp \
     engine/engine.cpp \
     engine/piece_value.cpp \
     main/main.cpp \
@@ -19,6 +20,7 @@ HEADERS += \
     board/coords.h \
     board/direction.h \
     board/move.h \
+    board/possible_moves_vector.h \
     engine/engine.h \
     engine/piece_value.h \
     window/window.h

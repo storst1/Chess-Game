@@ -24,8 +24,8 @@ struct Move
 
     Move& operator=(const Move& other) noexcept;
 
-    inline Coords FromCoords() const noexcept;
-    inline Coords ToCoords() const noexcept;
+    Coords FromCoords() const noexcept;
+    Coords ToCoords() const noexcept;
 
     int_fast8_t piece;
     uint_fast8_t x1;
@@ -36,28 +36,6 @@ struct Move
     uint_fast8_t ep_x; //X coords of captured pawn by en passant
     uint_fast8_t ep_y; //Y coords of captured pawn by en passant
     bool castle; //Determines if move was a castle move
-};
-
-class PossibleMovesVector{
-public:
-    PossibleMovesVector(Board& board);
-    PossibleMovesVector(const PossibleMovesVector& other) noexcept;
-    ~PossibleMovesVector() = default;
-
-    std::vector<Move>::const_iterator begin() const;
-    std::vector<Move>::const_iterator end() const;
-    std::vector<Move>::iterator begin();
-    std::vector<Move>::iterator end();
-
-    void push_back(Move move);
-    void push_back(Move& move);
-    void reserve(size_t size);
-    void clear();
-    size_t size() const noexcept;
-    bool empty() const noexcept;
-private:
-    std::vector<Move> moves;
-    Board& board;
 };
 
 #endif // MOVE_H

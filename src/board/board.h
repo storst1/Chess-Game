@@ -15,6 +15,7 @@
 #include "move.h"
 #include "direction.h"
 #include "coords.h"
+#include "possible_moves_vector.h"
 
 class Engine;
 

@@ -28,19 +28,20 @@ Move Engine::BestNextMove() noexcept
     return AlphaBetaSearch(-INF, INF, depth, true).second;
 }
 
-std::pair<int, Move> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left, bool initial_turn) noexcept
+std::pair<int, Move> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left, bool initial_color) noexcept
 {
     if(depth_left == 0){
-        return {Quiesce(alpha, beta, initial_turn), default_move};
+        return {(board.Turn() ? EvaluatePosition() : -EvaluatePosition()), default_move};
+        //return {Quiesce(alpha, beta, initial_color), default_move};
     }
 
     Move best_move = *board.PossibleMovesRef().begin();
     int value;
-    if(board.Turn() == initial_turn){
+    if(board.Turn() == initial_color){
         value = -INF;
         for(const auto& move : board.PossibleMoves()){
             board.RunMove(move);
-            int score = AlphaBetaSearch(alpha, beta, depth_left - 1, initial_turn).first;
+            int score = AlphaBetaSearch(alpha, beta, depth_left - 1, initial_color).first;
             board.RevertLastMove();
             if(score > value){
                 value = score;
@@ -56,7 +57,7 @@ std::pair<int, Move> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t d
         value = INF;
         for(const auto& move : board.PossibleMoves()){
             board.RunMove(move);
-            int score = AlphaBetaSearch(alpha, beta, depth_left - 1, initial_turn).first;
+            int score = AlphaBetaSearch(alpha, beta, depth_left - 1, initial_color).first;
             board.RevertLastMove();
             if(score < value){
                 value = score;

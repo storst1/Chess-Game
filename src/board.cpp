@@ -1252,3 +1252,14 @@ bool Coords::Valid() const noexcept
     }
     return true;
 }
+
+bool Coords::operator==(const Coords &other) const noexcept{
+    if(x == other.x && y == other.y){
+        return true;
+    }
+    return false;
+}
+
+bool Coords::operator!=(const Coords &other) const noexcept{
+    return !((*this) == other);
+}

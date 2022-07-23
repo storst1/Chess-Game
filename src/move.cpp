@@ -91,10 +91,10 @@ void PossibleMovesVector::push_back(Move move)
         }
 
         std::pair<DIR, Coords>& check_info = board.GetCheckByIdx(0);
-        if(check_info.first == DIR::KM && abs(move.piece) != 6){
+        if(check_info.first == DIR::KM && abs(move.piece) != 6 && move.ToCoords() != check_info.second){
             return;
         }
-        if(board.ChecksAmount() == 1 && abs(move.piece) != 6){
+        if(board.ChecksAmount() == 1 && abs(move.piece) != 6 && check_info.first != DIR::KM){
             DIR dir_after_move_relative_to_threat = Direction::CalculateDir(move.ToCoords(), check_info.second);
             if(!(dir_after_move_relative_to_threat == DIR::NONE || dir_after_move_relative_to_threat == Direction::Opposite(check_info.first))){
                 return;

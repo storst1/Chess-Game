@@ -25,7 +25,7 @@ int Engine::EvaluatePosition() noexcept
 //Assumes that there're possible moves in given position
 Move Engine::BestNextMove() noexcept
 {
-    return AlphaBetaSearch(-INF, INF, depth, board.Turn()).second;
+    return AlphaBetaSearch(-INF, INF, depth, true).second;
 }
 
 std::pair<int, Move> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left, bool initial_turn) noexcept

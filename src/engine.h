@@ -1,8 +1,6 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#define INF INT_MAX
-
 #include "board.h"
 #include "piece_value.h"
 
@@ -24,6 +22,8 @@ private:
     uint_fast8_t depth = 5;
     PieceValue piece_value;
     Move default_move{9, 9, 9, 9, 9, 9};
+
+    const int INF = INT_MAX;
 };
 
 #endif // ENGINE_H

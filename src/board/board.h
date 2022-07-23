@@ -1,8 +1,6 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#define DIR Direction::Dir
-
 #include <cstdint>
 #include <algorithm>
 #include <stdexcept>
@@ -15,25 +13,10 @@
 #include <QPainter>
 
 #include "move.h"
+#include "direction.h"
+#include "coords.h"
 
 class Engine;
-
-struct Coords{
-    uint_fast8_t x;
-    uint_fast8_t y;
-
-    bool operator==(const Coords& other) const noexcept;
-    bool operator!=(const Coords& other) const noexcept;
-
-    bool Valid() const noexcept;
-};
-
-class Direction{
-public:
-    enum Dir{U, UR, R, DR, D, DL, L, UL, KM, NONE};
-    static DIR CalculateDir(Coords from, Coords to) noexcept;
-    static DIR Opposite(Dir& dir) noexcept;
-};
 
 class Board
 {

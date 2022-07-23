@@ -1,7 +1,7 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include "board.h"
+#include "board/board.h"
 #include "piece_value.h"
 
 class Engine

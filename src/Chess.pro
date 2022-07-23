@@ -5,19 +5,23 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 CONFIG += c++17
 
 SOURCES += \
-    board.cpp \
-    engine.cpp \
-    main.cpp \
-    move.cpp \
-    piece_value.cpp \
-    window.cpp
+    board/board.cpp \
+    board/coords.cpp \
+    board/direction.cpp \
+    board/move.cpp \
+    engine/engine.cpp \
+    engine/piece_value.cpp \
+    main/main.cpp \
+    window/window.cpp
 
 HEADERS += \
-    board.h \
-    engine.h \
-    move.h \
-    piece_value.h \
-    window.h
+    board/board.h \
+    board/coords.h \
+    board/direction.h \
+    board/move.h \
+    engine/engine.h \
+    engine/piece_value.h \
+    window/window.h
 
 FORMS += \
     ../ui/window.ui

@@ -15,6 +15,34 @@ Move::Move(int_fast8_t piece,
 
 }
 
+Move::Move(const Move &other) noexcept :
+    piece(other.piece),
+    x1(other.x1),
+    y1(other.y1),
+    x2(other.x2),
+    y2(other.y2),
+    captured(other.captured),
+    ep_x(other.ep_x),
+    ep_y(other.ep_y),
+    castle(other.castle)
+{
+
+}
+
+Move &Move::operator=(const Move &other) noexcept
+{
+    piece = other.piece;
+    x1 = other.x1;
+    y1 = other.y1;
+    x2 = other.x2;
+    y2 = other.y2;
+    captured = other.captured;
+    ep_x = other.ep_x;
+    ep_y = other.ep_y;
+    castle = other.castle;
+    return *this;
+}
+
 Coords Move::FromCoords() const noexcept
 {
     return Coords{x1, y1};
@@ -26,6 +54,11 @@ Coords Move::ToCoords() const noexcept
 }
 
 PossibleMovesVector::PossibleMovesVector(Board &board) : board(board)
+{
+
+}
+
+PossibleMovesVector::PossibleMovesVector(const PossibleMovesVector &other) noexcept : moves(other.moves), board(other.board)
 {
 
 }

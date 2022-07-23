@@ -1011,6 +1011,11 @@ PossibleMovesVector &Board::PossibleMovesRef() noexcept
     return possible_moves;
 }
 
+PossibleMovesVector Board::PossibleMoves() const noexcept
+{
+    return possible_moves;
+}
+
 void Board::RunMove(const Move &move)
 {
     //En passant case

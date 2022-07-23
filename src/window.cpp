@@ -46,7 +46,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
         if(game_mode == 1){
             //Make AI move
             Engine engine(board);
-            Move& best_move = engine.BestNextMove();
+            Move best_move = engine.BestNextMove();
             board.RunMove(best_move);
             DrawAndUpdateBoard();
         }

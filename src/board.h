@@ -63,6 +63,7 @@ public:
     void ApplyUserMove(int x1, int y1, int x2, int y2);
     //API for engine
     PossibleMovesVector& PossibleMovesRef() noexcept;
+    PossibleMovesVector PossibleMoves() const noexcept;
     void RunMove(const Move &move);
     void RevertLastMove() noexcept;
 private:

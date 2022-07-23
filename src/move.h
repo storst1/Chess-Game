@@ -19,7 +19,10 @@ struct Move
          uint_fast8_t ep_y = 8,
          bool castle = false
          ) noexcept;
+    Move(const Move& other) noexcept;
     ~Move() = default;
+
+    Move& operator=(const Move& other) noexcept;
 
     inline Coords FromCoords() const noexcept;
     inline Coords ToCoords() const noexcept;
@@ -38,6 +41,7 @@ struct Move
 class PossibleMovesVector{
 public:
     PossibleMovesVector(Board& board);
+    PossibleMovesVector(const PossibleMovesVector& other) noexcept;
     ~PossibleMovesVector() = default;
 
     std::vector<Move>::const_iterator begin() const;

@@ -23,22 +23,22 @@ int Engine::EvaluatePosition() noexcept
 }
 
 //Assumes that there're possible moves in given position
-Move &Engine::BestNextMove() noexcept
+Move Engine::BestNextMove() noexcept
 {
     return AlphaBetaSearch(-INF, INF, depth, board.Turn()).second;
 }
 
-std::pair<int, Move &> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left, bool initial_turn) noexcept
+std::pair<int, Move> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left, bool initial_turn) noexcept
 {
     if(depth_left == 0){
         return {Quiesce(alpha, beta, initial_turn), default_move};
     }
 
-    Move& best_move = *board.PossibleMovesRef().begin();
+    Move best_move = *board.PossibleMovesRef().begin();
     int value;
     if(board.Turn() == initial_turn){
         value = -INF;
-        for(const auto& move : board.PossibleMovesRef()){
+        for(const auto& move : board.PossibleMoves()){
             board.RunMove(move);
             int score = AlphaBetaSearch(alpha, beta, depth_left - 1, initial_turn).first;
             board.RevertLastMove();
@@ -54,7 +54,7 @@ std::pair<int, Move &> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t
     }
     else{
         value = INF;
-        for(const auto& move : board.PossibleMovesRef()){
+        for(const auto& move : board.PossibleMoves()){
             board.RunMove(move);
             int score = AlphaBetaSearch(alpha, beta, depth_left - 1, initial_turn).first;
             board.RevertLastMove();
@@ -77,9 +77,9 @@ int Engine::Quiesce(int alpha, int beta, bool initial_turn) noexcept
     int value;
     if(board.Turn() == initial_turn){
         value = -INF;
-        for(const auto& move : board.PossibleMovesRef()){
+        for(const auto& move : board.PossibleMoves()){
             //Do not consider and skip non-capture moves
-            if(!(move.captured != 0 || move.ep_x != 8)){
+            if(move.captured == 0 || move.ep_x == 8){
                 continue;
             }
 
@@ -99,9 +99,9 @@ int Engine::Quiesce(int alpha, int beta, bool initial_turn) noexcept
     }
     else{
         value = INF;
-        for(const auto& move : board.PossibleMovesRef()){
+        for(const auto& move : board.PossibleMoves()){
             //Do not consider and skip non-capture moves
-            if(!(move.captured != 0 || move.ep_x != 8)){
+            if(move.captured == 0 || move.ep_x == 8){
                 continue;
             }
 

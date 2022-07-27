@@ -24,7 +24,7 @@ private:
     //int alphaBetaMin(int alpha, int beta, uint_fast8_t depth_left);
 private:
     Board board;
-    uint_fast8_t depth = 7;
+    uint_fast8_t depth = 5;
     PieceValue piece_value;
     Move default_move{9, 9, 9, 9, 9, 9};
 

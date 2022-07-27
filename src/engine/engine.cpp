@@ -25,51 +25,46 @@ int Engine::EvaluatePosition() noexcept
 //Assumes that there're possible moves in given position
 Move Engine::BestNextMove() noexcept
 {
-    return AlphaBetaSearch(-INF, INF, depth, true).second;
+    auto time_start = std::chrono::high_resolution_clock::now();
+    auto result = AlphaBetaSearch(-INF, INF, depth);
+    auto time_end = std::chrono::high_resolution_clock::now();
+    last_eval_time = time_end - time_start;
+    qDebug() << result.first;
+    return result.second;
 }
 
-std::pair<int, Move> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left, bool initial_color) noexcept
+double Engine::GetLastEvalTime() const noexcept
 {
-    if(depth_left == 0){
-        return {(board.Turn() ? EvaluatePosition() : -EvaluatePosition()), default_move};
+    return last_eval_time.count();
+}
+
+//NegaMax variation
+std::pair<int, Move> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left) noexcept
+{
+    if(depth_left == 0 || board.IsCheckmate()){ //TO DO: Add draw check
+        return {EvaluatePosition(), default_move};
         //return {Quiesce(alpha, beta, initial_color), default_move};
     }
 
     Move best_move = *board.PossibleMovesRef().begin();
-    int value;
-    if(board.Turn() == initial_color){
-        value = -INF;
-        for(const auto& move : board.PossibleMoves()){
-            board.RunMove(move);
-            int score = AlphaBetaSearch(alpha, beta, depth_left - 1, initial_color).first;
-            board.RevertLastMove();
-            if(score > value){
-                value = score;
-                best_move = move;
-            }
-            if(value >= beta){
-                break;
-            }
-            alpha = std::max(alpha, value);
+    int best = -INF - 1;
+    for(const Move& move : board.PossibleMoves()){
+        board.RunMove(move);
+        auto[score, cur_best_move] = AlphaBetaSearch(-beta, -alpha, depth_left - 1);
+        score = -score;
+        board.RevertLastMove();
+        if(score > best){
+            best = score;
+            best_move = move;
+        }
+        if(best > alpha){
+            alpha = best;
+        }
+        if(best >= beta){
+            break;
         }
     }
-    else{
-        value = INF;
-        for(const auto& move : board.PossibleMoves()){
-            board.RunMove(move);
-            int score = AlphaBetaSearch(alpha, beta, depth_left - 1, initial_color).first;
-            board.RevertLastMove();
-            if(score < value){
-                value = score;
-                best_move = move;
-            }
-            if(value <= alpha){
-                break;
-            }
-            beta = std::min(beta, value);
-        }
-    }
-    return {value, best_move};
+    return {best, best_move};
 }
 
 int Engine::Quiesce(int alpha, int beta, bool initial_turn) noexcept
@@ -123,3 +118,47 @@ int Engine::Quiesce(int alpha, int beta, bool initial_turn) noexcept
 
     return (further_positions ? value : EvaluatePosition());
 }
+
+/*
+int Engine::alphaBetaMax(int alpha, int beta, uint_fast8_t depth_left)
+{
+    if(depth_left == 0){
+        return EvaluatePosition();
+    }
+
+    for(const Move& move : board.PossibleMoves()){
+        board.RunMove(move);
+        int score = alphaBetaMin(alpha, beta, depth_left - 1);
+        board.RevertLastMove();
+
+        if(score >= beta){
+            return beta;
+        }
+        if(score > alpha){
+            alpha = score;
+        }
+    }
+    return alpha;
+}
+
+int Engine::alphaBetaMin(int alpha, int beta, uint_fast8_t depth_left)
+{
+    if(depth_left == 0){
+        return -EvaluatePosition();
+    }
+
+    for(const Move& move : board.PossibleMoves()){
+        board.RunMove(move);
+        int score = alphaBetaMin(alpha, beta, depth_left - 1);
+        board.RevertLastMove();
+
+        if(score <= alpha){
+            return alpha;
+        }
+        if(score < beta){
+            beta = score;
+        }
+    }
+    return beta;
+}
+*/

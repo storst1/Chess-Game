@@ -38,6 +38,11 @@ double Engine::GetLastEvalTime() const noexcept
     return last_eval_time.count();
 }
 
+constexpr int Engine::Inf() noexcept
+{
+    return INT_MAX;
+}
+
 //NegaMax variation
 std::pair<int, Move> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left) noexcept
 {

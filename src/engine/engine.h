@@ -17,6 +17,8 @@ public:
     int EvaluatePosition() noexcept;
     Move BestNextMove() noexcept;
     double GetLastEvalTime() const noexcept;
+
+    static constexpr int Inf() noexcept;
 private:
     std::pair<int, Move> AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left) noexcept;
     int Quiesce(int alpha, int beta, bool initial_turn) noexcept;

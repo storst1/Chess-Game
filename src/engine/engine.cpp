@@ -41,7 +41,10 @@ double Engine::GetLastEvalTime() const noexcept
 //NegaMax variation
 std::pair<int, Move> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left) noexcept
 {
-    if(depth_left == 0 || board.IsCheckmate()){ //TO DO: Add draw check
+    if(board.IsCheckmate()){
+        return {(board.Turn() ? -INF : INF), default_move};
+    }
+    if(depth_left == 0){ //TO DO: Add draw check
         return {EvaluatePosition(), default_move};
         //return {Quiesce(alpha, beta, initial_color), default_move};
     }

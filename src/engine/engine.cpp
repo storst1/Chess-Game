@@ -2,8 +2,8 @@
 
 Engine::Engine(Board &board) : board(board)
 {
-    //zobrist_hash.Init();
-    //zobrist_hash.SaveAsJsonFile(Zobrist_Hash::DefaultZHPath());
+    zobrist_hash.Init();
+    zobrist_hash.SaveAsJsonFile(Zobrist_Hash::DefaultZHPath());
     zobrist_hash.LoadFromJsonFile(Zobrist_Hash::DefaultZHPath());
 }
 

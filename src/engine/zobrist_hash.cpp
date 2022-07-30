@@ -74,18 +74,18 @@ void Zobrist_Hash::SaveAsJsonFile(QString path) const
         for(int j = 0; j < 8; ++j){
             for(int u = 0; u < 8; ++u){
                 QString value_name = QString::number(i) + ":" + QString::number(j) + ":" + QString::number(u);
-                pieces.insert(value_name, QJsonValue::fromVariant(pieces_hash[i][j][u]));
+                pieces.insert(value_name, QString::number((qulonglong)pieces_hash[i][j][u]));
             }
         }
     }
     for(int i = 0; i < 8; ++i){
-        en_passant.insert(QString::number(i), QJsonValue::fromVariant(en_passant_files[i]));
+        en_passant.insert(QString::number(i), QString::number((qulonglong)en_passant_files[i]));
     }
-    info.insert("move", QJsonValue::fromVariant(black_move));
-    info.insert("white_castle_kingside", QJsonValue::fromVariant(white_castle_kingside));
-    info.insert("white_castle_queenside", QJsonValue::fromVariant(white_castle_queenside));
-    info.insert("black_castle_kingside", QJsonValue::fromVariant(black_castle_kingside));
-    info.insert("black_castle_queenside", QJsonValue::fromVariant(black_castle_queenside));
+    info.insert("move", QString::number((qulonglong)black_move));
+    info.insert("white_castle_kingside", QString::number((qulonglong)white_castle_kingside));
+    info.insert("white_castle_queenside", QString::number((qulonglong)white_castle_queenside));
+    info.insert("black_castle_kingside", QString::number((qulonglong)black_castle_kingside));
+    info.insert("black_castle_queenside", QString::number((qulonglong)black_castle_queenside));
 
     main_obj.insert("info", info);
     main_obj.insert("en_passant", en_passant);
@@ -105,6 +105,7 @@ void Zobrist_Hash::SaveAsJsonFile(QString path) const
         //Error occured during the operation of opening the file
         qDebug() << "File was not opened in function SaveAsJsonFile(), path: " << path
                  << ", error string: " << file.errorString();
+        return;
     }
 
 }
@@ -134,25 +135,20 @@ void Zobrist_Hash::LoadFromJsonFile(QString path)
         for(int j = 0; j < 8; ++j){
             for(int u = 0 ;u < 8; ++u){
                 QString value_name = QString::number(i) + ":" + QString::number(j) + ":" + QString::number(u);
-                pieces_hash[i][j][u] = pieces_hash_obj[value_name].toVariant().toULongLong();
+                pieces_hash[i][j][u] = pieces_hash_obj[value_name].toString().toULongLong();
             }
         }
     }
 
     for(int i = 0; i < 8; ++i){
-        en_passant_files[i] = en_passang_obj[QString::number(i)].toVariant().toULongLong();
+        en_passant_files[i] = en_passang_obj[QString::number(i)].toString().toULongLong();
     }
-    bool ok = false;
-    black_move = info_obj["move"].toVariant().toULongLong(&ok);
-    if(!ok){
-        qDebug() << ok;
-    }
-    white_castle_kingside = info_obj["white_castle_kingside"].toVariant().toULongLong();
-    white_castle_queenside = info_obj["white_castle_queenside"].toVariant().toULongLong();
-    black_castle_kingside = info_obj["black_castle_kingside"].toVariant().toULongLong();
-    black_castle_queenside = info_obj["black_castle_queenside"].toVariant().toULongLong();
 
-    qDebug() << black_move << " " << white_castle_kingside;
+    black_move = info_obj["move"].toString().toULongLong();
+    white_castle_kingside = info_obj["white_castle_kingside"].toString().toULongLong();
+    white_castle_queenside = info_obj["white_castle_queenside"].toString().toULongLong();
+    black_castle_kingside = info_obj["black_castle_kingside"].toString().toULongLong();
+    black_castle_queenside = info_obj["black_castle_queenside"].toString().toULongLong();
 }
 
 QString Zobrist_Hash::DefaultZHPath() noexcept

@@ -8,7 +8,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 
-#include "engine.h"
+#include "engine/engine.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }

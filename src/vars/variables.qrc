@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>piece_value.json</file>
+        <file>zobrist_hash_default.json</file>
     </qresource>
 </RCC>

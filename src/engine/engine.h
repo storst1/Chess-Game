@@ -5,11 +5,12 @@
 
 #include "board/board.h"
 #include "piece_value.h"
+#include "zobrist_hash.h"
 
 class Engine
 {
 public:
-    Engine(Board& board);
+    explicit Engine(Board& board);
     ~Engine() = default;
 
     void SetDepth(uint_fast8_t new_depth);
@@ -29,6 +30,7 @@ private:
     uint_fast8_t depth = 5;
     PieceValue piece_value;
     Move default_move{9, 9, 9, 9, 9, 9};
+    Zobrist_Hash zobrist_hash;
 
     std::chrono::duration<double, std::milli> last_eval_time;
 

@@ -1,4 +1,5 @@
 #include "zobrist_hash.h"
+#include "board/board.h"
 
 //Creates uninitialized object that is NOT ready to be used properly
 Zobrist_Hash::Zobrist_Hash()
@@ -31,7 +32,43 @@ bool Zobrist_Hash::IsInitValidly() const noexcept
     return initialized_correctly;
 }
 
-uint_fast64_t &Zobrist_Hash::Piece(int_fast8_t piece, uint_fast8_t x, uint_fast8_t y) noexcept
+//Calculates Zobrist hash for given position on board
+uint_fast64_t Zobrist_Hash::CalculateHashValue(Board &board) noexcept
+{
+    uint_fast64_t hash = 0;
+    for(int i = 0; i < 8; ++i){
+        for(int j = 0; j < 8; ++j){
+            hash ^= PieceHash(board.Get(i, j), i, j);
+        }
+    }
+
+    if(!board.Turn()){
+        hash ^= black_move;
+    }
+    if(board.WCK_Possible()){
+        hash ^= white_castle_kingside;
+    }
+    if(board.WCQ_Possible()){
+        hash ^= white_castle_queenside;
+    }
+    if(board.BCK_Possible()){
+        hash ^= black_castle_kingside;
+    }
+    if(board.BCQ_Possible()){
+        hash ^= black_castle_queenside;
+    }
+
+    for(const auto& move : board.PossibleMovesRef()){
+        if(move.ep_x != 8){
+            hash ^= en_passant_files[move.x2];
+            break;
+        }
+    }
+
+    return hash;
+}
+
+uint_fast64_t &Zobrist_Hash::PieceHash(int_fast8_t piece, uint_fast8_t x, uint_fast8_t y) noexcept
 {
     if(piece < 0){
         piece += 13;

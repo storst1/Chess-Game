@@ -980,6 +980,26 @@ bool Board::IsCheckmate() const noexcept
     return IsCheck() && possible_moves.empty();
 }
 
+bool Board::WCK_Possible() const noexcept
+{
+    return white_king_moved && white_kingside_rook_moved;
+}
+
+bool Board::WCQ_Possible() const noexcept
+{
+    return white_king_moved && white_queenside_rook_moved;
+}
+
+bool Board::BCK_Possible() const noexcept
+{
+    return black_king_moved && black_kingside_rook_moved;
+}
+
+bool Board::BCQ_Possible() const noexcept
+{
+    return black_king_moved && black_queenside_rook_moved;
+}
+
 bool Board::CheckIfPieceWakable(int x, int y) const noexcept
 {
     return Same(turn, board[x][y]);

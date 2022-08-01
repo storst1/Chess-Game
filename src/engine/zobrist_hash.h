@@ -14,6 +14,8 @@
 #include <QDir>
 #include <QJsonValue>
 
+class Board;
+
 class Zobrist_Hash
 {
 public:
@@ -22,8 +24,9 @@ public:
 
     void Init() noexcept;
     bool IsInitValidly() const noexcept;
+    uint_fast64_t CalculateHashValue(Board& board) noexcept;
 
-    uint_fast64_t& Piece(int_fast8_t piece, uint_fast8_t x, uint_fast8_t y) noexcept;
+    uint_fast64_t& PieceHash(int_fast8_t piece, uint_fast8_t x, uint_fast8_t y) noexcept;
     uint_fast64_t& Move() noexcept;
     uint_fast64_t& WCK() noexcept;
     uint_fast64_t& WCQ() noexcept;

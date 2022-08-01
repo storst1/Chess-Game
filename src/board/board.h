@@ -39,6 +39,10 @@ public:
     uint_fast8_t ChecksAmount() const noexcept;
     std::pair<DIR, Coords>& GetCheckByIdx(uint_fast8_t idx) noexcept;
     bool IsCheckmate() const noexcept;
+    bool WCK_Possible() const noexcept; //White castle kingside possible
+    bool WCQ_Possible() const noexcept; //White castle queenside possible
+    bool BCK_Possible() const noexcept; //Black castle kingside possible
+    bool BCQ_Possible() const noexcept; //Black castle queenside possible
 
     static bool OnBoard(uint_fast8_t x, uint_fast8_t y) noexcept;
     static QPixmap GetPiecePixmap(int_fast8_t type) noexcept;
@@ -48,6 +52,7 @@ public:
     bool CheckIfPieceWakable(int x, int y) const noexcept;
     bool IsLegalMove(int x1, int y1, int x2, int y2) const noexcept;
     void ApplyUserMove(int x1, int y1, int x2, int y2);
+
     //API for engine
     PossibleMovesVector& PossibleMovesRef() noexcept;
     PossibleMovesVector PossibleMoves() const noexcept;

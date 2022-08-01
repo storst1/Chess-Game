@@ -47,7 +47,7 @@ void PossibleMovesVector::push_back(Move move)
             if(!(dir_after_move_relative_to_threat == DIR::NONE || dir_after_move_relative_to_threat == Direction::Opposite(check_info.first))){
                 return;
             }
-            DIR dir_after_move_relative_to_own_king = Direction::CalculateDir(move.ToCoords(), (board.Turn() ? board.FindKing(true) : board.FindKing(false)));
+            DIR dir_after_move_relative_to_own_king = Direction::CalculateDir(move.ToCoords(), (board.Turn() ? board.KingPos(true) : board.KingPos(false)));
             if(dir_after_move_relative_to_own_king == Direction::Opposite(check_info.first)){
                 return;
             }
@@ -84,7 +84,7 @@ void PossibleMovesVector::push_back(Move &move)
             if(!(dir_after_move_relative_to_threat == DIR::NONE || dir_after_move_relative_to_threat == Direction::Opposite(check_info.first))){
                 return;
             }
-            DIR dir_after_move_relative_to_own_king = Direction::CalculateDir(move.ToCoords(), (board.Turn() ? board.FindKing(true) : board.FindKing(false)));
+            DIR dir_after_move_relative_to_own_king = Direction::CalculateDir(move.ToCoords(), (board.Turn() ? board.KingPos(true) : board.KingPos(false)));
             if(dir_after_move_relative_to_own_king == Direction::Opposite(check_info.first)){
                 return;
             }

@@ -32,12 +32,165 @@ Board::Board(const Board &parent) noexcept
     }
 }
 
+//Loads position from Forsyth–Edwards Notation
+//Returns true if given string was valid and process was successfull, false otherwise
+bool Board::LoadFromFEN(const QString &FEN)
+{
+    //Pre-setting bool variables that hold castle rights to true (default value)
+    //since they'll be set false by the FEN string if needed
+    SetAllCastleVars(true);
+
+    enum ReadingStage{board_pos, cur_turn, castle_rights, en_passant_file,
+                      halfmove_clock, fullmove_clock, end}; //last three are considered not necessary
+    auto IncrStage = [](ReadingStage& stage){
+        if(stage == fullmove_clock){
+            return; //Stage cannot go further than "fullmove_clock" stage
+        }
+        //Uses the assumption that ReadingStage enum is continuous
+        stage = static_cast<ReadingStage>(static_cast<int>(stage) + 1);
+    };
+    ReadingStage stage = board_pos;
+    bool skip_letter = false;
+    int file = 0;
+    int square = 0;
+    for(const QChar& c : FEN){
+        if(skip_letter){
+            skip_letter = false;
+            continue;
+        }
+        if(c.isLetter() || c == '-'){
+            if(stage == board_pos){
+                if(!OnBoard(file, square)){
+                    return false;
+                }
+
+                uint_fast8_t value = 0;
+                if(c.toLower() == 'p'){
+                    value = 1;
+                }
+                else if(c.toLower() == 'n'){
+                    value = 2;
+                }
+                else if(c.toLower() == 'b'){
+                    value = 3;
+                }
+                else if(c.toLower() == 'r'){
+                    value = 4;
+                }
+                else if(c.toLower() == 'q'){
+                    value = 5;
+                }
+                else if(c.toLower() == 'k'){
+                    value = 6;
+                }
+                else{
+                    //Current tetter is not a piece, FEN code is invalid
+                    return false;
+                }
+                board[square][file] = (c.isUpper() ? value : -value);
+                square++;
+            }
+            else if(stage == cur_turn){
+                if(c == 'w'){
+                    turn = true;
+                }
+                else if(c == 'b'){
+                    turn = false;
+                }
+                else{
+                    //Letter does not describe current move holder
+                    return false;
+                }
+                IncrStage(stage);
+                skip_letter = true;
+            }
+            else if(stage == castle_rights){
+                if(c == 'k'){
+                    black_king_moved = false;
+                    black_kingside_rook_moved = false;
+                }
+                else if(c == 'q'){
+                    black_king_moved = false;
+                    black_queenside_rook_moved = false;
+                }
+                else if(c == 'K'){
+                    white_king_moved = false;
+                    white_kingside_rook_moved = false;
+                }
+                else if(c == 'Q'){
+                    white_king_moved = false;
+                    white_queenside_rook_moved = false;
+                }
+                else if(c == '-'){
+                    continue;
+                }
+                else{
+                    return false;
+                }
+            }
+            else if(stage == en_passant_file){
+                if(c == '-'){
+                    skip_letter = true;
+                    IncrStage(stage);
+                    continue;
+                }
+                else{
+                    return false;
+                }
+            }
+            else if(stage == halfmove_clock || stage == fullmove_clock){
+                //There shouldn't be letters on the en_passant_file stage
+                return false;
+            }
+        }
+        else if(c == '/'){
+            if(stage != board_pos){
+                return false;
+            }
+
+            file++;
+            square = 0;
+        }
+        else if(c.isDigit()){
+            if(stage == board_pos){
+                square += (c.toLatin1() - '0');
+                if(square > 8){
+                    return false;
+                }
+            }
+            else if(stage == en_passant_file){
+                //TO DO: do something about it
+            }
+            else if(stage == halfmove_clock){
+                //TO DO: do something about it
+            }
+            else if(stage == fullmove_clock){
+                //TO DO: do something about it
+            }
+            else{
+                return false;
+            }
+        }
+        else if(c == ' '){
+            IncrStage(stage);
+        }
+        else{
+            //Unknown symbol
+            return false;
+        }
+    }
+    if(stage == board_pos || stage == cur_turn || stage == castle_rights || stage == en_passant_file){
+        return false;
+    }
+    return true;
+}
+
 void Board::DrawBoard(QPainter *painter, int cx, int cy) const noexcept
 {
     bool painted[8][8]{};
 
     if(IsCheck()){
-        Coords king_pos = FindKing(turn);
+        Coords king_pos = KingPos(turn);
         painter->fillRect(king_pos.x * sp + 1, king_pos.y * sp + 1, sp - 1, sp - 1, check_on_king_square);
         painted[king_pos.x][king_pos.y] = true;
     }
@@ -102,9 +255,23 @@ Move &Board::LastMove()
     return moves_played[moves_played.size() - 1];
 }
 
-Coords Board::FindKing(bool color) const noexcept
+Coords Board::KingPos(bool color) const noexcept
 {
     return (color ? white_king_coords : black_king_coors);
+}
+
+//Iterates over the board and returns Coords of the king of given color
+//If king of given color is not on the board, returns Coords{8, 8}
+Coords Board::FindKing(bool color) const noexcept
+{
+    for(uint_fast8_t i = 0; i < 8; ++i){
+        for(uint_fast8_t j = 0; j < 8; ++j){
+            if(board[i][j] == (color ? 6 : -6)){
+                return Coords{i, j};
+            }
+        }
+    }
+    return Coords{8, 8};
 }
 
 //Calculates all the possible moves on the board for the color that ows the current turn
@@ -897,6 +1064,17 @@ void Board::ClearDefendedSquares() noexcept
     }
 }
 
+void Board::SetAllCastleVars(bool value) noexcept
+{
+    white_king_moved = value;
+    black_king_moved = value;
+
+    white_kingside_rook_moved = value;
+    white_queenside_rook_moved = value;
+    black_kingside_rook_moved = value;
+    black_queenside_rook_moved = value;
+}
+
 QPixmap Board::GetPiecePixmap(int_fast8_t type) noexcept
 {
     if(type == 1){
@@ -998,6 +1176,25 @@ bool Board::BCK_Possible() const noexcept
 bool Board::BCQ_Possible() const noexcept
 {
     return black_king_moved && black_queenside_rook_moved;
+}
+
+//Returns board to the default state except without any pieces on it (all the squares are empty)
+void Board::ClearEverything() noexcept
+{
+    for(int i = 0; i < 8; ++i){
+        for(int j = 0; j < 8; ++j){
+            board[i][j] = 0;
+        }
+    }
+    SetAllCastleVars(false);
+    turn = true;
+    checks.clear();
+    possible_moves.clear();
+    total_turns = 0;
+    moves_played.clear();
+    ClearDefendedSquares();
+    black_king_coors = {4, 0}; //Default value, but not necessarily correct
+    white_king_coords = {4, 7}; //Default value, but not necessarily correct
 }
 
 bool Board::CheckIfPieceWakable(int x, int y) const noexcept

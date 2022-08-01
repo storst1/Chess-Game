@@ -26,11 +26,13 @@ public:
     Board(const Board& parent) noexcept;
     ~Board() = default;
 
+    bool LoadFromFEN(const QString &FEN);
     bool Turn() const noexcept;
     int_fast8_t TotalTurns() const noexcept;
     int_fast8_t& Get(uint_fast8_t x, uint_fast8_t y) noexcept;
     int_fast8_t At(uint_fast8_t x, uint_fast8_t y) const;
     Move& LastMove();
+    Coords KingPos(bool color) const noexcept;
     Coords FindKing(bool color) const noexcept;
     void CalculatePossibleMoves() noexcept;
     bool CheckIfSquareDefended(uint_fast8_t x, uint_fast8_t y) const noexcept;
@@ -43,12 +45,13 @@ public:
     bool WCQ_Possible() const noexcept; //White castle queenside possible
     bool BCK_Possible() const noexcept; //Black castle kingside possible
     bool BCQ_Possible() const noexcept; //Black castle queenside possible
+    void ClearEverything() noexcept;
 
     static bool OnBoard(uint_fast8_t x, uint_fast8_t y) noexcept;
     static QPixmap GetPiecePixmap(int_fast8_t type) noexcept;
 
     //API for window class to interact with a user
-    void DrawBoard(QPainter *painter, int cx = -1, int cy = -1) const noexcept;
+    void DrawBoard(QPainter* painter, int cx = -1, int cy = -1) const noexcept;
     bool CheckIfPieceWakable(int x, int y) const noexcept;
     bool IsLegalMove(int x1, int y1, int x2, int y2) const noexcept;
     void ApplyUserMove(int x1, int y1, int x2, int y2);
@@ -79,6 +82,7 @@ private:
     bool Same(bool turn, int_fast8_t square) const noexcept;
     void ClearAllowedMoves() noexcept;
     void ClearDefendedSquares() noexcept;
+    void SetAllCastleVars(bool value) noexcept;
 private:
     int_fast8_t board[8][8] =
     {

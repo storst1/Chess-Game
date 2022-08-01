@@ -10,6 +10,8 @@ MainWindow::MainWindow(QWidget *parent)
     lay = new QGridLayout(ui->centralwidget);
     pixmap = new QPixmap(800, 800);
     painter = new QPainter(pixmap);
+    //const QString s = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    //qDebug() << board.LoadFromFEN(s);
     board.DrawBoard(painter, -1, -1);
     main_label = new QLabel();
     main_label->setFixedSize(800, 800);

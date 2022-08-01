@@ -34,6 +34,7 @@ public:
     Move& LastMove();
     Coords KingPos(bool color) const noexcept;
     Coords FindKing(bool color) const noexcept;
+    bool IsDefended(uint_fast8_t x, uint_fast8_t y) const noexcept;
     void CalculatePossibleMoves() noexcept;
     bool CheckIfSquareDefended(uint_fast8_t x, uint_fast8_t y) const noexcept;
     bool CheckIfMoveIsAllowed(uint_fast8_t x, uint_fast8_t y, DIR& dir) const noexcept;
@@ -46,6 +47,8 @@ public:
     bool BCK_Possible() const noexcept; //Black castle kingside possible
     bool BCQ_Possible() const noexcept; //Black castle queenside possible
     void ClearEverything() noexcept;
+    void ClearBoardPieces() noexcept;
+    void SetDefaultStartingBoard() noexcept;
 
     static bool OnBoard(uint_fast8_t x, uint_fast8_t y) noexcept;
     static QPixmap GetPiecePixmap(int_fast8_t type) noexcept;
@@ -61,6 +64,10 @@ public:
     PossibleMovesVector PossibleMoves() const noexcept;
     void RunMove(const Move &move);
     void RevertLastMove() noexcept;
+
+    //Debug functions
+    void D_PrintDefendedSquares() const noexcept;
+    void D_PrintBoard() const noexcept;
 private:
     void CalculateMoves(uint_fast8_t x, uint_fast8_t y) noexcept;
     void CalculatePawnMoves(uint_fast8_t x, uint_fast8_t y) noexcept;

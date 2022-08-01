@@ -52,7 +52,7 @@ std::pair<int, Move> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t d
         return {(board.Turn() ? -INF : INF), default_move};
     }
     if(depth_left == 0){ //TO DO: Add draw check
-        return {EvaluatePosition(), default_move};
+        return {(board.Turn() ? EvaluatePosition() : -EvaluatePosition()), default_move};
         //return {Quiesce(alpha, beta, initial_color), default_move};
     }
 

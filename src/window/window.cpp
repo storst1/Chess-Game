@@ -49,6 +49,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
             //Make AI move
             Engine engine(board);
             Move best_move = engine.BestNextMove();
+            board.D_PrintDefendedSquares();
             board.RunMove(best_move);
             DrawAndUpdateBoard();
         }

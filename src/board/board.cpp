@@ -274,6 +274,12 @@ Coords Board::FindKing(bool color) const noexcept
     return Coords{8, 8};
 }
 
+//Does not check if pair {x, y} is on the board
+bool Board::IsDefended(uint_fast8_t x, uint_fast8_t y) const noexcept
+{
+    return defended_squares[x][y];
+}
+
 //Calculates all the possible moves on the board for the color that ows the current turn
 void Board::CalculatePossibleMoves() noexcept
 {
@@ -1181,11 +1187,7 @@ bool Board::BCQ_Possible() const noexcept
 //Returns board to the default state except without any pieces on it (all the squares are empty)
 void Board::ClearEverything() noexcept
 {
-    for(int i = 0; i < 8; ++i){
-        for(int j = 0; j < 8; ++j){
-            board[i][j] = 0;
-        }
-    }
+    ClearBoardPieces();
     SetAllCastleVars(false);
     turn = true;
     checks.clear();
@@ -1195,6 +1197,21 @@ void Board::ClearEverything() noexcept
     ClearDefendedSquares();
     black_king_coors = {4, 0}; //Default value, but not necessarily correct
     white_king_coords = {4, 7}; //Default value, but not necessarily correct
+}
+
+void Board::ClearBoardPieces() noexcept
+{
+    for(int i = 0; i < 8; ++i){
+        for(int j = 0; j < 8; ++j){
+            board[i][j] = 0;
+        }
+    }
+}
+
+void Board::SetDefaultStartingBoard() noexcept
+{
+    const QString starting_pos_FEN_str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    LoadFromFEN(starting_pos_FEN_str);
 }
 
 bool Board::CheckIfPieceWakable(int x, int y) const noexcept
@@ -1384,4 +1401,28 @@ void Board::RevertLastMove() noexcept
     moves_played.pop_back();
 
     CalculatePossibleMoves();
+}
+
+void Board::D_PrintDefendedSquares() const noexcept
+{
+    QDebug debug = qDebug();
+    debug << "Defended squares:\n ";
+    for(int i = 0; i < 8; ++i){
+        for(int j = 0; j < 8; ++j){
+            debug << (int)defended_squares[j][i] << " ";
+        }
+        debug << "\n";
+    }
+}
+
+void Board::D_PrintBoard() const noexcept
+{
+    QDebug debug = qDebug();
+    debug << "Board:\n ";
+    for(int i = 0; i < 8; ++i){
+        for(int j = 0; j < 8; ++j){
+            debug << (int)board[i][j] << " ";
+        }
+        debug << "\n";
+    }
 }

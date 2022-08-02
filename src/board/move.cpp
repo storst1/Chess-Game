@@ -52,3 +52,49 @@ Coords Move::ToCoords() const noexcept
 {
     return Coords{x2, y2};
 }
+
+QString Move::ToString() const noexcept
+{
+    if(castle){
+        //For now all catle moves being labeled as "O-O", but it should be changed in the future
+        return "O-O";
+    }
+    QString output;
+    if(ep_x != 8){
+        //En passant case
+        output += Board::FileToChar(x1);
+        output += "x";
+        output += Board::FileToChar(x2);
+        output += QString::number(y2) + " e.p."; //e.p. suffix stands for "en passant"
+        return output;
+    }
+
+    if(abs(piece) == 1){
+        output += "p";
+    }
+    else if(abs(piece) == 2){
+        output += "N";
+        output += Board::FileToChar(x1);
+        output += QString::number(y1);
+    }
+    else if(abs(piece) == 3){
+        output += "B";
+    }
+    else if(abs(piece) == 4){
+        output += "R";
+        output += Board::FileToChar(x1);
+    }
+    else if(abs(piece) == 5){
+        output += "Q";
+    }
+    else//(abs(piece) == 6)
+    {
+        output += "K";
+    }
+    if(captured){
+        output += "x";
+    }
+    output += Board::FileToChar(x2);
+    output += QString::number(y2);
+    return output;
+}

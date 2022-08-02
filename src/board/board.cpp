@@ -185,6 +185,7 @@ bool Board::LoadFromFEN(const QString &FEN)
     return true;
 }
 
+//This function draws the board to the @*painter object of QPainter type
 void Board::DrawBoard(QPainter *painter, int cx, int cy) const noexcept
 {
     bool painted[8][8]{};
@@ -247,6 +248,8 @@ int_fast8_t Board::At(uint_fast8_t x, uint_fast8_t y) const
     return board[x][y];
 }
 
+//Returns reference to the last move that was played on this board
+//Will throw exception if no moves were played
 Move &Board::LastMove()
 {
     if(moves_played.empty()){
@@ -255,13 +258,15 @@ Move &Board::LastMove()
     return moves_played[moves_played.size() - 1];
 }
 
+//Returns current position of the king of given @color based on the value of the internal variable
+//This function might return wrong result if board was initialized with non-standart starting position
 Coords Board::KingPos(bool color) const noexcept
 {
     return (color ? white_king_coords : black_king_coors);
 }
 
-//Iterates over the board and returns Coords of the king of given color
-//If king of given color is not on the board, returns Coords{8, 8}
+//Iterates over the board and returns Coords of the king of given @color
+//If king of given @color is not on the board, returns Coords{8, 8}
 Coords Board::FindKing(bool color) const noexcept
 {
     for(uint_fast8_t i = 0; i < 8; ++i){
@@ -281,6 +286,7 @@ bool Board::IsDefended(uint_fast8_t x, uint_fast8_t y) const noexcept
 }
 
 //Calculates all the possible moves on the board for the color that ows the current turn
+//Reuslts are being pushed back to the possible_moves vector property
 void Board::CalculateAllMoves() noexcept
 {
     checks.clear();
@@ -534,6 +540,7 @@ void Board::CalculateKingMoves(uint_fast8_t x, uint_fast8_t y) noexcept
     }
 }
 
+//This function generates moves for the any type of sliding piece in given direction (@x_del, @y_del)
 void Board::CalculateSlidingMoves(const uint_fast8_t x, const uint_fast8_t y, int_fast8_t x_del, int_fast8_t y_del) noexcept
 {
     uint_fast8_t nx = x + x_del, ny = y + y_del;
@@ -553,6 +560,11 @@ void Board::CalculateSlidingMoves(const uint_fast8_t x, const uint_fast8_t y, in
     }
 }
 
+//Calculates additional info from the opponent pieces that might be used during move generation of own pieces
+//This function gathers information such as:
+// - Defended squares (fills in @defended_squares property) - squares that are being attacked/protected/under contol of opponent pieces
+// - Checks on the board (@checks property) and type of those checks
+// - Allowed moves (fills in @allowed_moves property) - 2D vector to keep track of allowed move directions in case of check
 void Board::CalculateAdditionalInfo() noexcept
 {
     for(uint_fast8_t i = 0; i < 8; ++i){
@@ -773,6 +785,7 @@ bool Board::Opposite(bool turn, int_fast8_t square) const noexcept
     return false;
 }
 
+//Function checks if square value is same to current turns color, returns true if so, false otherwise (excluding if square's empty)
 bool Board::Same(bool turn, int_fast8_t square) const noexcept
 {
     return !Opposite(turn, square);
@@ -796,6 +809,7 @@ void Board::ClearDefendedSquares() noexcept
     }
 }
 
+//Sets all the variables that are used to determine if each type of castle is possible to @value
 void Board::SetAllCastleVars(bool value) noexcept
 {
     white_king_moved = value;
@@ -807,6 +821,11 @@ void Board::SetAllCastleVars(bool value) noexcept
     black_queenside_rook_moved = value;
 }
 
+//Returns QPixmap for the given @type of piece (might vary from -6 to 6)
+//Will return output of default QPixmap constructor (QPixmap()) if:
+//   @type > 6
+//or @type < -6
+//or @type == 0
 QPixmap Board::GetPiecePixmap(int_fast8_t type) noexcept
 {
     if(type == 1){
@@ -848,11 +867,26 @@ QPixmap Board::GetPiecePixmap(int_fast8_t type) noexcept
     return QPixmap();
 }
 
+//Returns character that is used to describe given @file
+//Ex: 0 - 'a', 1 - 'b', etc.
+//Returns '?' if file argument is incorrect (does not adhere to the expression -1 < @file < 8)
+QChar Board::FileToChar(uint_fast8_t file) noexcept
+{
+    if(file > 7){
+        //Since the type of @file is unsigned, we don't need to check if @file < 0
+        return '?';
+    }
+    return QChar(file + 49);
+}
+
 bool Board::CheckIfSquareDefended(uint_fast8_t x, uint_fast8_t y) const noexcept
 {
     return defended_squares[x][y];
 }
 
+//Does NOT check if move is allowed in general!
+//Checks if move from {@x, @y} in given direction(@dir) is possible during check based on the pre-calculated
+//content of the @allowed_moves property
 bool Board::CheckIfMoveIsAllowed(uint_fast8_t x, uint_fast8_t y, Direction::Dir &dir) const noexcept
 {
     if(allowed_moves[x][y].empty()){
@@ -868,11 +902,13 @@ bool Board::CheckIfMoveIsAllowed(uint_fast8_t x, uint_fast8_t y, Direction::Dir 
     return false;
 }
 
+//Returns true if there're any checks on board, false otherwise
 bool Board::IsCheck() const noexcept
 {
     return !checks.empty();
 }
 
+//Returns amount of checks there are currently on the board
 uint_fast8_t Board::ChecksAmount() const noexcept
 {
     return checks.size();
@@ -934,17 +970,34 @@ void Board::ClearBoardPieces() noexcept
     }
 }
 
+//Sets board to the default starting position using Board::LoadFromFEN() function
+//Could be used to reset the board in runtime
 void Board::SetDefaultStartingBoard() noexcept
 {
     const QString starting_pos_FEN_str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
     LoadFromFEN(starting_pos_FEN_str);
 }
 
+size_t Board::PossibleMovesStartingCapacity() const noexcept
+{
+    return possible_moves_capacity;
+}
+
+size_t Board::MovesPlayedStartingCapacity() const noexcept
+{
+    return moves_played_capacity;
+}
+
+//Checks if piece on square {@x, @y} could be used by owner of current turn
+//(in other words: checks if it's piece of the same color that owns the turn)
 bool Board::CheckIfPieceWakable(int x, int y) const noexcept
 {
     return Same(turn, board[x][y]);
 }
 
+//Checks if move from {@x1, @y1} square to {@x2, @y2} square could be played in current position
+//NOTE: This function does not generate moves, it only checks for move in @possible_moves vector property
+//So it might return invalid result if moves weren't generated beforehand
 bool Board::IsLegalMove(int x1, int y1, int x2, int y2) const noexcept
 {
     for(const auto& move : possible_moves){
@@ -955,6 +1008,8 @@ bool Board::IsLegalMove(int x1, int y1, int x2, int y2) const noexcept
     return false;
 }
 
+//Moves piece from {@x1, @y1} square to {@x2, @y2} square with prior check if move is legal
+//If such move is not legal, will do nothing
 void Board::ApplyUserMove(int x1, int y1, int x2, int y2)
 {
     Move user_move(board[x1][y1], x1, y1, x2, y2, board[x2][y2]);
@@ -976,6 +1031,7 @@ PossibleMovesVector Board::PossibleMoves() const noexcept
     return possible_moves;
 }
 
+//Performs @move on the board fully assuming given @move is legal
 void Board::RunMove(const Move &move)
 {
     //En passant case
@@ -1129,10 +1185,21 @@ void Board::RevertLastMove() noexcept
     CalculateAllMoves();
 }
 
+std::vector<Move> Board::PlayedMoves() const noexcept
+{
+    return moves_played;
+}
+
+std::vector<Move> &Board::PlayedMovesRef() noexcept
+{
+    return moves_played;
+}
+
+//Prints the content of the @defended_sqaures property in qDebug()
 void Board::D_PrintDefendedSquares() const noexcept
 {
     QDebug debug = qDebug();
-    debug << "Defended squares:\n ";
+    debug << "Defended squares:\n";
     for(int i = 0; i < 8; ++i){
         for(int j = 0; j < 8; ++j){
             debug << (int)defended_squares[j][i] << " ";
@@ -1141,6 +1208,7 @@ void Board::D_PrintDefendedSquares() const noexcept
     }
 }
 
+//Prints the content of the @board property in qDebug()
 void Board::D_PrintBoard() const noexcept
 {
     QDebug debug = qDebug();

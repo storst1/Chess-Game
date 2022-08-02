@@ -4,6 +4,8 @@
 #include <vector>
 #include <cstdint>
 
+#include <QString>
+
 class Board;
 struct Coords;
 
@@ -26,6 +28,7 @@ struct Move
 
     Coords FromCoords() const noexcept;
     Coords ToCoords() const noexcept;
+    QString ToString() const noexcept;
 
     int_fast8_t piece;
     uint_fast8_t x1;

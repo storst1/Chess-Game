@@ -22,9 +22,8 @@ public:
     static constexpr int Inf() noexcept;
 private:
     std::pair<int, Move> AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left) noexcept;
+    std::pair<int, Move> NegamaxAlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left) noexcept;
     int Quiesce(int alpha, int beta, bool initial_turn) noexcept;
-    //int alphaBetaMax(int alpha, int beta, uint_fast8_t depth_left);
-    //int alphaBetaMin(int alpha, int beta, uint_fast8_t depth_left);
 private:
     Board board;
     uint_fast8_t depth = 2;

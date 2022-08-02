@@ -40,7 +40,6 @@ public:
     bool CheckIfMoveIsAllowed(uint_fast8_t x, uint_fast8_t y, DIR& dir) const noexcept;
     bool IsCheck() const noexcept;
     uint_fast8_t ChecksAmount() const noexcept;
-    std::pair<DIR, Coords>& GetCheckByIdx(uint_fast8_t idx) noexcept;
     bool IsCheckmate() const noexcept;
     bool WCK_Possible() const noexcept; //White castle kingside possible
     bool WCQ_Possible() const noexcept; //White castle queenside possible
@@ -49,9 +48,12 @@ public:
     void ClearEverything() noexcept;
     void ClearBoardPieces() noexcept;
     void SetDefaultStartingBoard() noexcept;
+    size_t PossibleMovesStartingCapacity() const noexcept;
+    size_t MovesPlayedStartingCapacity() const noexcept;
 
     static bool OnBoard(uint_fast8_t x, uint_fast8_t y) noexcept;
     static QPixmap GetPiecePixmap(int_fast8_t type) noexcept;
+    static QChar FileToChar(uint_fast8_t file) noexcept;
 
     //API for window class to interact with a user
     void DrawBoard(QPainter* painter, int cx = -1, int cy = -1) const noexcept;
@@ -64,6 +66,9 @@ public:
     PossibleMovesVector PossibleMoves() const noexcept;
     void RunMove(const Move &move);
     void RevertLastMove() noexcept;
+    std::vector<Move> PlayedMoves() const noexcept;
+    std::vector<Move>& PlayedMovesRef() noexcept;
+    std::pair<DIR, Coords>& GetCheckByIdx(uint_fast8_t idx) noexcept;
 
     //Debug functions
     void D_PrintDefendedSquares() const noexcept;
@@ -129,7 +134,7 @@ private:
     const QColor highlighted_square = QColor(1, 241, 254);
     const QColor current_square = QColor(255, 252, 128);
     const QColor check_on_king_square = QColor(255, 0, 0);
-    const int sp = 100; //square pixels
+    const int sp = 100; //Pixels per square (tile)
     const size_t possible_moves_capacity = 60;
     const size_t moves_played_capacity = 200;
 };

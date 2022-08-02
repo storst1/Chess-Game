@@ -281,7 +281,7 @@ bool Board::IsDefended(uint_fast8_t x, uint_fast8_t y) const noexcept
 }
 
 //Calculates all the possible moves on the board for the color that ows the current turn
-void Board::CalculatePossibleMoves() noexcept
+void Board::CalculateAllMoves() noexcept
 {
     checks.clear();
     possible_moves.clear();
@@ -426,128 +426,18 @@ void Board::CalculateKnightMoves(uint_fast8_t x, uint_fast8_t y) noexcept
 
 void Board::CalculateBishopMoves(uint_fast8_t x, uint_fast8_t y) noexcept
 {
-    uint_fast8_t nx = x - 1, ny = y - 1;
-    while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0){
-            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
-        }
-        else if(Same(turn, board[nx][ny])){
-            break;
-        }
-        else if(Opposite(turn, board[nx][ny])){
-            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
-            break;
-        }
-        --nx; --ny;
-    }
-
-    nx = x + 1, ny = y - 1;
-    while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0){
-            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
-        }
-        else if(Same(turn, board[nx][ny])){
-            break;
-        }
-        else if(Opposite(turn, board[nx][ny])){
-            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
-            break;
-        }
-        ++nx; --ny;
-    }
-
-    nx = x + 1, ny = y + 1;
-    while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0){
-            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
-        }
-        else if(Same(turn, board[nx][ny])){
-            break;
-        }
-        else if(Opposite(turn, board[nx][ny])){
-            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
-            break;
-        }
-        ++nx; ++ny;
-    }
-
-    nx = x - 1, ny = y + 1;
-    while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0){
-            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
-        }
-        else if(Same(turn, board[nx][ny])){
-            break;
-        }
-        else if(Opposite(turn, board[nx][ny])){
-            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
-            break;
-        }
-        --nx; ++ny;
-    }
+    CalculateSlidingMoves(x, y, -1, -1);
+    CalculateSlidingMoves(x, y, -1, 1);
+    CalculateSlidingMoves(x, y, 1, -1);
+    CalculateSlidingMoves(x, y, 1, 1);
 }
 
 void Board::CalculateRookMoves(uint_fast8_t x, uint_fast8_t y) noexcept
 {
-    uint_fast8_t nx = x - 1, ny = y;
-    while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0){
-            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
-        }
-        else if(Same(turn, board[nx][ny])){
-            break;
-        }
-        else if(Opposite(turn, board[nx][ny])){
-            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
-            break;
-        }
-        --nx;
-    }
-
-    nx = x + 1;
-    while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0){
-            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
-        }
-        else if(Same(turn, board[nx][ny])){
-            break;
-        }
-        else if(Opposite(turn, board[nx][ny])){
-            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
-            break;
-        }
-        ++nx;
-    }
-
-    nx = x; ny = y - 1;
-    while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0){
-            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
-        }
-        else if(Same(turn, board[nx][ny])){
-            break;
-        }
-        else if(Opposite(turn, board[nx][ny])){
-            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
-            break;
-        }
-        --ny;
-    }
-
-    ny = y + 1;
-    while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0){
-            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
-        }
-        else if(Same(turn, board[nx][ny])){
-            break;
-        }
-        else if(Opposite(turn, board[nx][ny])){
-            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
-            break;
-        }
-        ++ny;
-    }
+    CalculateSlidingMoves(x, y, -1, 0);
+    CalculateSlidingMoves(x, y, 1, 0);
+    CalculateSlidingMoves(x, y, 0, -1);
+    CalculateSlidingMoves(x, y, 0, 1);
 }
 
 void Board::CalculateQueenMoves(uint_fast8_t x, uint_fast8_t y) noexcept
@@ -641,6 +531,25 @@ void Board::CalculateKingMoves(uint_fast8_t x, uint_fast8_t y) noexcept
                 possible_moves.push_back(Move(-6, 4, 0, 6, 0, 0, 8, 8, true));
             }
         }
+    }
+}
+
+void Board::CalculateSlidingMoves(const uint_fast8_t x, const uint_fast8_t y, int_fast8_t x_del, int_fast8_t y_del) noexcept
+{
+    uint_fast8_t nx = x + x_del, ny = y + y_del;
+    while(OnBoard(nx, ny)){
+        if(board[nx][ny] == 0){
+            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
+        }
+        else if(Same(turn, board[nx][ny])){
+            break;
+        }
+        else if(Opposite(turn, board[nx][ny])){
+            possible_moves.push_back(Move(board[x][y], x, y, nx, ny, board[nx][ny]));
+            break;
+        }
+        nx += x_del;
+        ny += y_del;
     }
 }
 
@@ -763,242 +672,18 @@ void Board::CalculateInfoKnight(uint_fast8_t x, uint_fast8_t y) noexcept
 
 void Board::CalculateInfoBishop(uint_fast8_t x, uint_fast8_t y) noexcept
 {
-    uint_fast8_t nx = x - 1, ny = y - 1;
-    bool met_opposite = false;
-    Coords first_opposite;
-    while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0){
-            defended_squares[nx][ny] = true;
-        }
-        else if(Opposite(turn, board[nx][ny])){
-            defended_squares[nx][ny] = true;
-            break;
-        }
-        else if(Same(turn, board[nx][ny])){
-            if(!met_opposite){
-                met_opposite = true;
-                first_opposite = {nx, ny};
-                if(board[nx][ny] == (turn ? 6 : -6)){
-                    checks.push_back({DIR::UL, Coords{x, y}});
-                    break;
-                }
-            }
-            else{
-                if(board[nx][ny] == (turn ? 6 : -6)){
-                    allowed_moves[first_opposite.x][first_opposite.y].push_back(DIR::DR);
-                }
-                break;
-            }
-        }
-        --nx; --ny;
-    }
-
-    nx = x + 1, ny = y - 1;
-    met_opposite = false;
-    while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0){
-            defended_squares[nx][ny] = true;
-        }
-        else if(Opposite(turn, board[nx][ny])){
-            defended_squares[nx][ny] = true;
-            break;
-        }
-        else if(Same(turn, board[nx][ny])){
-            if(!met_opposite){
-                met_opposite = true;
-                first_opposite = {nx, ny};
-                if(board[nx][ny] == (turn ? 6 : -6)){
-                    checks.push_back({DIR::UR, Coords{x, y}});
-                    break;
-                }
-            }
-            else{
-                if(board[nx][ny] == (turn ? 6 : -6)){
-                    allowed_moves[first_opposite.x][first_opposite.y].push_back(DIR::DL);
-                }
-                break;
-            }
-        }
-        ++nx; --ny;
-    }
-
-    nx = x + 1, ny = y + 1;
-    met_opposite = false;
-    while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0){
-            defended_squares[nx][ny] = true;
-        }
-        else if(Opposite(turn, board[nx][ny])){
-            defended_squares[nx][ny] = true;
-            break;
-        }
-        else if(Same(turn, board[nx][ny])){
-            if(!met_opposite){
-                met_opposite = true;
-                first_opposite = {nx, ny};
-                if(board[nx][ny] == (turn ? 6 : -6)){
-                    checks.push_back({DIR::DR, Coords{x, y}});
-                    break;
-                }
-            }
-            else{
-                if(board[nx][ny] == (turn ? 6 : -6)){
-                    allowed_moves[first_opposite.x][first_opposite.y].push_back(DIR::UL);
-                }
-                break;
-            }
-        }
-        ++nx; ++ny;
-    }
-
-    nx = x - 1, ny = y + 1;
-    met_opposite = false;
-    while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0){
-            defended_squares[nx][ny] = true;
-        }
-        else if(Opposite(turn, board[nx][ny])){
-            defended_squares[nx][ny] = true;
-            break;
-        }
-        else if(Same(turn, board[nx][ny])){
-            if(!met_opposite){
-                met_opposite = true;
-                first_opposite = {nx, ny};
-                if(board[nx][ny] == (turn ? 6 : -6)){
-                    checks.push_back({DIR::DL, Coords{x, y}});
-                    break;
-                }
-            }
-            else{
-                if(board[nx][ny] == (turn ? 6 : -6)){
-                    allowed_moves[first_opposite.x][first_opposite.y].push_back(DIR::UR);
-                }
-                break;
-            }
-        }
-        --nx; ++ny;
-    }
+    CalculateInfoSlidingTowards(x, y, -1, -1, DIR::UL, DIR::DR);
+    CalculateInfoSlidingTowards(x, y, -1, 1, DIR::DL, DIR::UR);
+    CalculateInfoSlidingTowards(x, y, 1, -1, DIR::UR, DIR::DL);
+    CalculateInfoSlidingTowards(x, y, 1, 1, DIR::DR, DIR::UL);
 }
 
 void Board::CalculateInfoRook(uint_fast8_t x, uint_fast8_t y) noexcept
 {
-    uint_fast8_t nx = x - 1, ny = y;
-    bool met_opposite = false;
-    Coords first_opposite;
-    while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0){
-            defended_squares[nx][ny] = true;
-        }
-        else if(Opposite(turn, board[nx][ny])){
-            defended_squares[nx][ny] = true;
-            break;
-        }
-        else if(Same(turn, board[nx][ny])){
-            if(!met_opposite){
-                met_opposite = true;
-                first_opposite = {nx, ny};
-                if(board[nx][ny] == (turn ? 6 : -6)){
-                    checks.push_back({DIR::L, Coords{x, y}});
-                    break;
-                }
-            }
-            else{
-                if(board[nx][ny] == (turn ? 6 : -6)){
-                    allowed_moves[first_opposite.x][first_opposite.y].push_back(DIR::R);
-                }
-                break;
-            }
-        }
-        --nx;
-    }
-
-    nx = x + 1;
-    met_opposite = false;
-    while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0){
-            defended_squares[nx][ny] = true;
-        }
-        else if(Opposite(turn, board[nx][ny])){
-            defended_squares[nx][ny] = true;
-            break;
-        }
-        else if(Same(turn, board[nx][ny])){
-            if(!met_opposite){
-                met_opposite = true;
-                first_opposite = {nx, ny};
-                if(board[nx][ny] == (turn ? 6 : -6)){
-                    checks.push_back({DIR::R, Coords{x, y}});
-                    break;
-                }
-            }
-            else{
-                if(board[nx][ny] == (turn ? 6 : -6)){
-                    allowed_moves[first_opposite.x][first_opposite.y].push_back(DIR::L);
-                }
-                break;
-            }
-        }
-        ++nx;
-    }
-
-    nx = x; ny = y - 1;
-    met_opposite = false;
-    while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0){
-            defended_squares[nx][ny] = true;
-        }
-        else if(Opposite(turn, board[nx][ny])){
-            defended_squares[nx][ny] = true;
-            break;
-        }
-        else if(Same(turn, board[nx][ny])){
-            if(!met_opposite){
-                met_opposite = true;
-                first_opposite = {nx, ny};
-                if(board[nx][ny] == (turn ? 6 : -6)){
-                    checks.push_back({DIR::U, Coords{x, y}});
-                    break;
-                }
-            }
-            else{
-                if(board[nx][ny] == (turn ? 6 : -6)){
-                    allowed_moves[first_opposite.x][first_opposite.y].push_back(DIR::D);
-                }
-                break;
-            }
-        }
-        --ny;
-    }
-
-    ny = y + 1;
-    met_opposite = false;
-    while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0){
-            defended_squares[nx][ny] = true;
-        }
-        else if(Opposite(turn, board[nx][ny])){
-            defended_squares[nx][ny] = true;
-            break;
-        }
-        else if(Same(turn, board[nx][ny])){
-            if(!met_opposite){
-                met_opposite = true;
-                first_opposite = {nx, ny};
-                if(board[nx][ny] == (turn ? 6 : -6)){
-                    checks.push_back({DIR::D, Coords{x, y}});
-                    break;
-                }
-            }
-            else{
-                if(board[nx][ny] == (turn ? 6 : -6)){
-                    allowed_moves[first_opposite.x][first_opposite.y].push_back(DIR::U);
-                }
-                break;
-            }
-        }
-        ++ny;
-    }
+    CalculateInfoSlidingTowards(x, y, -1, 0, DIR::L, DIR::R);
+    CalculateInfoSlidingTowards(x, y, 1, 0, DIR::R, DIR::L);
+    CalculateInfoSlidingTowards(x, y, 0, -1, DIR::U, DIR::D);
+    CalculateInfoSlidingTowards(x, y, 0, 1, DIR::D, DIR::U);
 }
 
 void Board::CalculateInfoQueen(uint_fast8_t x, uint_fast8_t y) noexcept
@@ -1032,6 +717,47 @@ void Board::CalculateInfoKing(uint_fast8_t x, uint_fast8_t y) noexcept
     }
     if(OnBoard(x - 1, y)){
         defended_squares[x - 1][y] = true;
+    }
+}
+
+void Board::CalculateInfoSlidingTowards(const uint_fast8_t x, const uint_fast8_t y,
+                                       int_fast8_t x_del, int_fast8_t y_del,
+                                       const DIR dir, DIR opp_dir) noexcept
+{
+    uint_fast8_t nx = x + x_del, ny = y + y_del;
+    if(opp_dir == DIR::NONE){ //If opp_dir set to default value, we need to calculate its actual value
+        opp_dir = Direction::Opposite(dir);
+    }
+    bool met_opposite = false;
+    Coords first_opposite;
+    while(OnBoard(nx, ny)){
+        if(board[nx][ny] == 0 && !met_opposite){
+            defended_squares[nx][ny] = true;
+        }
+        else if(Opposite(turn, board[nx][ny])){
+            if(!met_opposite){
+                defended_squares[nx][ny] = true;
+            }
+            break;
+        }
+        else if(Same(turn, board[nx][ny])){
+            if(!met_opposite){
+                met_opposite = true;
+                first_opposite = {nx, ny};
+                if(board[nx][ny] == (turn ? 6 : -6)){
+                    checks.push_back({dir, Coords{x, y}});
+                    break;
+                }
+            }
+            else{
+                if(board[nx][ny] == (turn ? 6 : -6)){
+                    allowed_moves[first_opposite.x][first_opposite.y].push_back(opp_dir);
+                }
+                break;
+            }
+        }
+        nx += x_del;
+        ny += y_del;
     }
 }
 
@@ -1322,7 +1048,7 @@ void Board::RunMove(const Move &move)
     turn = !turn;
     moves_played.push_back(move);
 
-    CalculatePossibleMoves();
+    CalculateAllMoves();
 }
 
 //Reverts last move assuming that that it does excist without checking for it
@@ -1400,7 +1126,7 @@ void Board::RevertLastMove() noexcept
     turn = !turn;
     moves_played.pop_back();
 
-    CalculatePossibleMoves();
+    CalculateAllMoves();
 }
 
 void Board::D_PrintDefendedSquares() const noexcept

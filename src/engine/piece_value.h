@@ -6,10 +6,11 @@
 #include <QJsonObject>
 
 struct PieceValue{
-    PieceValue();
+    PieceValue(const QString &path);
     ~PieceValue() = default;
 
     int GetPieceValue(int_fast8_t piece);
+    void D_PrintPieceValues() const noexcept;
 
     unsigned int pawn_cost;
     unsigned int knight_cost;

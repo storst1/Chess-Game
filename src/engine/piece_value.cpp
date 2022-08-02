@@ -1,9 +1,9 @@
 #include "piece_value.h"
 
-PieceValue::PieceValue()
+PieceValue::PieceValue(const QString& path)
 {
     QFile file;
-    file.setFileName(":/piece_value.json");
+    file.setFileName(path);
     file.open(QIODevice::ReadOnly | QIODevice::Text);
     QString text = file.readAll();
     file.close();
@@ -39,4 +39,16 @@ int PieceValue::GetPieceValue(int_fast8_t piece)
         return king_cost;
     }
     return 0;
+}
+
+void PieceValue::D_PrintPieceValues() const noexcept
+{
+    QDebug debug = qDebug();
+    debug << "Piece values:"
+          << "\nPawn: " << pawn_cost
+          << "\nKnight: " << knight_cost
+          << "\nBishop: " << bishop_cost
+          << "\nRook: " << rook_cost
+          << "\nQueen: " << queen_cost
+          << "\nKing: " << king_cost;
 }

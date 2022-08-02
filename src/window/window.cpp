@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     main_label->setPixmap(*pixmap);
     main_label->setScaledContents(true);
     lay->addWidget(main_label);
-    board.CalculatePossibleMoves();
+    board.CalculateAllMoves();
 }
 
 MainWindow::~MainWindow()
@@ -49,9 +49,10 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
             //Make AI move
             Engine engine(board);
             Move best_move = engine.BestNextMove();
-            board.D_PrintDefendedSquares();
+            //board.D_PrintDefendedSquares();
             board.RunMove(best_move);
             DrawAndUpdateBoard();
+            board.D_PrintDefendedSquares();
         }
         return;
     }

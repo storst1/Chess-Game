@@ -46,7 +46,7 @@ Direction::Dir Direction::CalculateDir(Coords from, Coords to) noexcept
 }
 
 //Returns opposite direction if type of direction is diagonal, horizontal or vertical otherwise returns given direction
-Direction::Dir Direction::Opposite(Dir &dir) noexcept
+Direction::Dir Direction::Opposite(const Dir &dir) noexcept
 {
     if(dir == DIR::D){
         return DIR::U;

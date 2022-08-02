@@ -1,10 +1,11 @@
 #include "engine.h"
 
-Engine::Engine(Board &board) : board(board)
+Engine::Engine(Board &board) : board(board), piece_value(":/piece_value.json")
 {
     //zobrist_hash.Init();
     //zobrist_hash.SaveAsJsonFile(Zobrist_Hash::DefaultZHPath());
     zobrist_hash.LoadFromJsonFile(Zobrist_Hash::DefaultZHPath());
+    //piece_value.D_PrintPieceValues();
 }
 
 void Engine::SetDepth(uint_fast8_t new_depth)

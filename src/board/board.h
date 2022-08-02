@@ -35,7 +35,7 @@ public:
     Coords KingPos(bool color) const noexcept;
     Coords FindKing(bool color) const noexcept;
     bool IsDefended(uint_fast8_t x, uint_fast8_t y) const noexcept;
-    void CalculatePossibleMoves() noexcept;
+    void CalculateAllMoves() noexcept;
     bool CheckIfSquareDefended(uint_fast8_t x, uint_fast8_t y) const noexcept;
     bool CheckIfMoveIsAllowed(uint_fast8_t x, uint_fast8_t y, DIR& dir) const noexcept;
     bool IsCheck() const noexcept;
@@ -76,6 +76,8 @@ private:
     void CalculateRookMoves(uint_fast8_t x, uint_fast8_t y) noexcept;
     void CalculateQueenMoves(uint_fast8_t x, uint_fast8_t y) noexcept;
     void CalculateKingMoves(uint_fast8_t x, uint_fast8_t y) noexcept;
+    void CalculateSlidingMoves(const uint_fast8_t x, const uint_fast8_t y,
+                               int_fast8_t x_del, int_fast8_t y_del) noexcept;
     void CalculateAdditionalInfo() noexcept;
     void CalculateAdditionalInfoForPiece(uint_fast8_t x, uint_fast8_t y) noexcept;
     void CalculateInfoPawn(uint_fast8_t x, uint_fast8_t y) noexcept;
@@ -84,6 +86,9 @@ private:
     void CalculateInfoRook(uint_fast8_t x, uint_fast8_t y) noexcept;
     void CalculateInfoQueen(uint_fast8_t x, uint_fast8_t y) noexcept;
     void CalculateInfoKing(uint_fast8_t x, uint_fast8_t y) noexcept;
+    void CalculateInfoSlidingTowards(const uint_fast8_t x, const uint_fast8_t y,
+                                    int_fast8_t x_del, int_fast8_t y_del,
+                                    const Direction::Dir dir, Direction::Dir opp_dir = Direction::NONE) noexcept;
 
     bool Opposite(bool turn, int_fast8_t square) const noexcept;
     bool Same(bool turn, int_fast8_t square) const noexcept;

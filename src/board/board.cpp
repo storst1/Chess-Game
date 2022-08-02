@@ -741,33 +741,77 @@ void Board::CalculateInfoSlidingTowards(const uint_fast8_t x, const uint_fast8_t
         opp_dir = Direction::Opposite(dir);
     }
     bool met_opposite = false;
+    bool check_on_board = false;
     Coords first_opposite;
     while(OnBoard(nx, ny)){
-        if(board[nx][ny] == 0 && !met_opposite){
+        if(board[nx][ny] == 0 && (!met_opposite || check_on_board)){
+
+            //If square on the line in front of piece in given direction @dir
+            //is empty and we haven't met opposite color piece yet,
+            //mark this square as defended
+
             defended_squares[nx][ny] = true;
         }
         else if(Opposite(turn, board[nx][ny])){
-            if(!met_opposite){
+
+            //If we've met a piece of the same color as our piece, we should
+            //mark this square as defended if we haven't met opposite piece yet
+            //or the piece we met was opponents king
+            //NOTE: [sgn(board[{@x, @y}]) != @turn] - Always true for this function
+
+            if(!met_opposite || check_on_board){
                 defended_squares[nx][ny] = true;
             }
             break;
         }
         else if(Same(turn, board[nx][ny])){
+
+            //Meeting a piece of opposite color on the way of our ray
+
             if(!met_opposite){
+
+                //If we haven't met opposite piece yet,
+                //set assosiated flag and variable @first_opposite to
+                //valid current values
+
                 met_opposite = true;
                 first_opposite = {nx, ny};
                 if(board[nx][ny] == (turn ? 6 : -6)){
+                    //If the piece we've met is king of the move owning color,
+                    //that means check is on the board,
+                    //update the @checks property
+
+                    check_on_board = true;
                     checks.push_back({dir, Coords{x, y}});
-                    break;
                 }
             }
-            else{
+            else{ //(met_opposite == true)
+
+                //We have met a piece of opposite color before
+
                 if(board[nx][ny] == (turn ? 6 : -6)){
+
+                    //If a king is on the way, that means
+                    //a piece that we've met prior is pinned to the king
+                    //and the only two direction it can be moved are
+                    //@dir and @opp_dir
+
                     allowed_moves[first_opposite.x][first_opposite.y].push_back(opp_dir);
+                    allowed_moves[first_opposite.x][first_opposite.y].push_back(dir);
+
+                    //Search deeper down the ray "behind" king to prevent it from moving
+                    //down this ray in case of check
+                    //(to make squares behind the king marked as defended)
+
+                    continue;
                 }
+
+                //Do not search deeper down the ray
                 break;
             }
         }
+
+        //Perform one square deeper shift down the ray
         nx += x_del;
         ny += y_del;
     }

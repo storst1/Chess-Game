@@ -52,7 +52,12 @@ constexpr int Engine::Inf() noexcept
 std::pair<int, Move> Engine::AlphaBetaSearch(int alpha, int beta, uint_fast8_t depth_left) noexcept
 {
     if(depth_left == 0){
-
+        QDebug debug = qDebug();
+        debug<< "Branch: ";
+        for(const Move& move : board.PlayedMovesRef()){
+            debug << move.ToString() << " ";
+        }
+        debug << "\nWhite-based evaluation: " << EvaluatePosition() << "\n";
         return {(board.Turn() ? EvaluatePosition() : -EvaluatePosition()), default_move};
         //return {Quiesce(alpha, beta, initial_color), default_move};
     }

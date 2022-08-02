@@ -16,6 +16,7 @@
 #include "direction.h"
 #include "coords.h"
 #include "possible_moves_vector.h"
+#include "engine/piece_value.h"
 
 class Engine;
 
@@ -50,6 +51,21 @@ public:
     void SetDefaultStartingBoard() noexcept;
     size_t PossibleMovesStartingCapacity() const noexcept;
     size_t MovesPlayedStartingCapacity() const noexcept;
+    int TotalBishops() const noexcept;
+    int TotalPawns() const noexcept;
+    int TotalKnights() const noexcept;
+    int TotalRooks() const noexcept;
+    int TotalQueens() const noexcept;
+    int TotalKings() const noexcept;
+    int TotalEmptySquares() const noexcept;
+    int TotalBishops(bool color) const noexcept;
+    int TotalPawns(bool color) const noexcept;
+    int TotalKnights(bool color) const noexcept;
+    int TotalRooks(bool color) const noexcept;
+    int TotalQueens(bool color) const noexcept;
+    int TotalKings(bool color) const noexcept;
+    int TotalPieces() const noexcept;
+    int TotalPieces(bool color) const noexcept;
 
     static bool OnBoard(uint_fast8_t x, uint_fast8_t y) noexcept;
     static QPixmap GetPiecePixmap(int_fast8_t type) noexcept;

@@ -988,6 +988,175 @@ size_t Board::MovesPlayedStartingCapacity() const noexcept
     return moves_played_capacity;
 }
 
+int Board::TotalBishops() const noexcept
+{
+    int cnt = 0;
+    for(size_t i = 0; i < 64; ++i){
+        if(abs(board[i % 8][i / 8]) == 3){
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+
+int Board::TotalPawns() const noexcept
+{
+    int cnt = 0;
+    for(size_t i = 0; i < 64; ++i){
+        if(abs(board[i % 8][i / 8]) == 1){
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+
+int Board::TotalKnights() const noexcept
+{
+    int cnt = 0;
+    for(size_t i = 0; i < 64; ++i){
+        if(abs(board[i % 8][i / 8]) == 2){
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+
+int Board::TotalRooks() const noexcept
+{
+    int cnt = 0;
+    for(size_t i = 0; i < 64; ++i){
+        if(abs(board[i % 8][i / 8]) == 4){
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+
+int Board::TotalQueens() const noexcept
+{
+    int cnt = 0;
+    for(size_t i = 0; i < 64; ++i){
+        if(abs(board[i % 8][i / 8]) == 5){
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+
+int Board::TotalKings() const noexcept
+{
+    int cnt = 0;
+    for(size_t i = 0; i < 64; ++i){
+        if(abs(board[i % 8][i / 8]) == 6){
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+
+int Board::TotalEmptySquares() const noexcept
+{
+    int cnt = 0;
+    for(size_t i = 0; i < 64; ++i){
+        if(board[i % 8][i / 8] == 0){
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+
+int Board::TotalBishops(bool color) const noexcept
+{
+    int cnt = 0;
+    for(size_t i = 0; i < 64; ++i){
+        if(board[i % 8][i / 8] == (color ? 3 : -3)){
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+
+int Board::TotalPawns(bool color) const noexcept
+{
+    int cnt = 0;
+    for(size_t i = 0; i < 64; ++i){
+        if(board[i % 8][i / 8] == (color ? 1 : -1)){
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+
+int Board::TotalKnights(bool color) const noexcept
+{
+    int cnt = 0;
+    for(size_t i = 0; i < 64; ++i){
+        if(board[i % 8][i / 8] == (color ? 2 : -2)){
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+
+int Board::TotalRooks(bool color) const noexcept
+{
+    int cnt = 0;
+    for(size_t i = 0; i < 64; ++i){
+        if(board[i % 8][i / 8] == (color ? 4 : -4)){
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+
+int Board::TotalQueens(bool color) const noexcept
+{
+    int cnt = 0;
+    for(size_t i = 0; i < 64; ++i){
+        if(board[i % 8][i / 8] == (color ? 5 : -5)){
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+
+int Board::TotalKings(bool color) const noexcept
+{
+    int cnt = 0;
+    for(size_t i = 0; i < 64; ++i){
+        if(board[i % 8][i / 8] == (color ? 6 : -6)){
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+
+int Board::TotalPieces() const noexcept
+{
+    int cnt = 0;
+    for(size_t i = 0; i < 64; ++i){
+        if(board[i % 8][i / 8]){
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+
+int Board::TotalPieces(bool color) const noexcept
+{
+    int color_sgn = color;
+    if(!color_sgn){
+        color_sgn = -color_sgn;
+    }
+    int cnt = 0;
+    for(size_t i = 0; i < 64; ++i){
+        if(PieceValue::Sgn(board[i % 8][i / 8]) == color_sgn){
+            ++cnt;
+        }
+    }
+    return cnt;
+}
+
 //Checks if piece on square {@x, @y} could be used by owner of current turn
 //(in other words: checks if it's piece of the same color that owns the turn)
 bool Board::CheckIfPieceWakable(int x, int y) const noexcept

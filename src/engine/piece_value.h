@@ -18,6 +18,11 @@ struct PieceValue{
     unsigned int rook_cost;
     unsigned int queen_cost;
     unsigned int king_cost;
+
+    template<typename T>
+    static int Sgn(T val) {
+        return (T(0) < val) - (val < T(0));
+    }
 };
 
 #endif // PIECEVALUE_H

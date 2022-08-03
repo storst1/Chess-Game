@@ -11,6 +11,7 @@ SOURCES += \
     board/move.cpp \
     board/possible_moves_vector.cpp \
     engine/engine.cpp \
+    engine/perft.cpp \
     engine/piece_value.cpp \
     engine/zobrist_hash.cpp \
     main/main.cpp \
@@ -23,6 +24,7 @@ HEADERS += \
     board/move.h \
     board/possible_moves_vector.h \
     engine/engine.h \
+    engine/perft.h \
     engine/piece_value.h \
     engine/zobrist_hash.h \
     window/window.h

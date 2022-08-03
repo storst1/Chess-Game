@@ -6,6 +6,7 @@
 #include "board/board.h"
 #include "piece_value.h"
 #include "zobrist_hash.h"
+#include "perft.h"
 
 class Engine
 {
@@ -18,6 +19,9 @@ public:
     int EvaluatePosition() noexcept;
     Move BestNextMove() noexcept;
     double GetLastEvalTime() const noexcept;
+
+    //Perft
+    bool PerformPerftCheck(const uint_fast8_t search_depth, const QString& correct_ans_json_path) const;
 
     static constexpr int Inf() noexcept;
 private:

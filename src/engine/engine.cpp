@@ -43,6 +43,11 @@ double Engine::GetLastEvalTime() const noexcept
     return last_eval_time.count();
 }
 
+bool Engine::PerformPerftCheck(const uint_fast8_t search_depth, const QString &correct_ans_json_path) const
+{
+    PerftInfo correctPerftInfo(search_depth);
+}
+
 constexpr int Engine::Inf() noexcept
 {
     return INT_MAX;
